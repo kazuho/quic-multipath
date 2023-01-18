@@ -5,7 +5,7 @@
 QUIC Working Group                                           Y. Liu, Ed.
 Internet-Draft                                                     Y. Ma
 Intended status: Standards Track                            Alibaba Inc.
-Expires: 27 April 2023                                Q. De Coninck, Ed.
+Expires: 22 July 2023                                 Q. De Coninck, Ed.
                                                                UCLouvain
                                                           O. Bonaventure
                                                   UCLouvain and Tessares
@@ -13,7 +13,7 @@ Expires: 27 April 2023                                Q. De Coninck, Ed.
                                                     Private Octopus Inc.
                                                       M. Kuehlewind, Ed.
                                                                 Ericsson
-                                                         24 October 2022
+                                                         18 January 2023
 
 
                       Multipath Extension for QUIC
@@ -51,11 +51,11 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 27 April 2023.
+   This Internet-Draft will expire on 22 July 2023.
 
 Copyright Notice
 
-   Copyright (c) 2022 IETF Trust and the persons identified as the
+   Copyright (c) 2023 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -1369,7 +1369,7 @@ Table of Contents
 14.  IANA Considerations
 
    This document defines a new transport parameter for the negotiation
-   of enable multiple paths for QUIC, and two new frame types.  The
+   of enable multiple paths for QUIC, and three new frame types.  The
    draft defines provisional values for experiments, but we expect IANA
    to allocate short values if the draft is approved.
 
@@ -1406,15 +1406,15 @@ Table of Contents
    to the "QUIC Transport Error Codes" registry under the "QUIC
    Protocol" heading.
 
-   +==============+=======================+============+===============+
-   | Value        | Code                  |Description | Specification |
-   +==============+=======================+============+===============+
-   | TBD          | MP_PROTOCOL_VIOLATION |Multipath   | Section 13    |
-   | (experiments |                       |protocol    |               |
-   | use 0xba01)  |                       |violation   |               |
-   +--------------+-----------------------+------------+---------------+
+   +==============+=======================+===========+===============+
+   | Value        | Code                  |Description| Specification |
+   +==============+=======================+===========+===============+
+   | TBD          | MP_PROTOCOL_VIOLATION |Multipath  | Section 13    |
+   | (experiments |                       |protocol   |               |
+   | use 0xba01)  |                       |violation  |               |
+   +--------------+-----------------------+-----------+---------------+
 
-                   Table 5: Error Code for Multipath QUIC
+                  Table 5: Error Code for Multipath QUIC
 
 15.  Security Considerations
 
