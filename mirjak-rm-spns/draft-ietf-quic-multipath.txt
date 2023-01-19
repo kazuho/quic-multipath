@@ -5,7 +5,7 @@
 QUIC Working Group                                           Y. Liu, Ed.
 Internet-Draft                                                     Y. Ma
 Intended status: Standards Track                            Alibaba Inc.
-Expires: 18 July 2023                                 Q. De Coninck, Ed.
+Expires: 23 July 2023                                 Q. De Coninck, Ed.
                                                                UCLouvain
                                                           O. Bonaventure
                                                   UCLouvain and Tessares
@@ -13,7 +13,7 @@ Expires: 18 July 2023                                 Q. De Coninck, Ed.
                                                     Private Octopus Inc.
                                                       M. Kuehlewind, Ed.
                                                                 Ericsson
-                                                         14 January 2023
+                                                         19 January 2023
 
 
                       Multipath Extension for QUIC
@@ -51,7 +51,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 18 July 2023.
+   This Internet-Draft will expire on 23 July 2023.
 
 Copyright Notice
 
@@ -262,7 +262,7 @@ Table of Contents
    as specified in [QUIC-TRANSPORT].  The new transport parameter is
    defined as follows:
 
-   *  name: enable_multipath (TBD - experiments use 0xbabf)
+   *  name: enable_multipath (current version uses 0x0f739bbc1b666d04)
 
    *  value: 0 (default) for disabled.
 
@@ -1137,11 +1137,12 @@ Table of Contents
    The following entry in Table 3 should be added to the "QUIC Transport
    Parameters" registry under the "QUIC Protocol" heading.
 
-    +==============================+==================+===============+
-    | Value                        | Parameter Name.  | Specification |
-    +==============================+==================+===============+
-    | TBD (experiments use 0xbabf) | enable_multipath | Section 3     |
-    +------------------------------+------------------+---------------+
+      +==========================+==================+===============+
+      | Value                    | Parameter Name.  | Specification |
+      +==========================+==================+===============+
+      | TBD (current version     | enable_multipath | Section 3     |
+      | uses 0x0f739bbc1b666d04) |                  |               |
+      +--------------------------+------------------+---------------+
 
            Table 3: Addition to QUIC Transport Parameters Entries
 
