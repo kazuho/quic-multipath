@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2023-01-15T00:51:46.168432+00:00",
+  "timestamp": "2023-01-19T00:49:58.175573+00:00",
   "repo": "quicwg/multipath",
   "labels": [
     {
@@ -12936,7 +12936,7 @@
       "labels": [],
       "body": "This PR removes the use of a single packet number space on multiple paths as a fully supported option. However, it currently doesn't remove it entirely.\r\nSpecifically, it moves the respective text for now into the appendix but still allows the reception of packets without a Connection ID on multiple validated paths, similarly as path migration is not strictly forbidden without connection ID.",
       "createdAt": "2022-10-21T15:46:36Z",
-      "updatedAt": "2023-01-14T12:56:55Z",
+      "updatedAt": "2023-01-18T14:31:33Z",
       "baseRepository": "quicwg/multipath",
       "baseRefName": "main",
       "baseRefOid": "749aa03ec09471f0ba5b533ac540bfdec7ab8e6b",
@@ -13333,9 +13333,9 @@
           "comments": [
             {
               "originalPosition": 73,
-              "body": "Yes, I agree that we need to change. Just need to decide with number.",
+              "body": "Yes, I agree that we need to change. Just need to decide which number.",
               "createdAt": "2023-01-14T12:53:41Z",
-              "updatedAt": "2023-01-14T12:53:41Z"
+              "updatedAt": "2023-01-18T14:31:33Z"
             }
           ]
         },
