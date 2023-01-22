@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2023-01-19T00:49:58.175573+00:00",
+  "timestamp": "2023-01-22T00:51:57.616379+00:00",
   "repo": "quicwg/multipath",
   "labels": [
     {
@@ -12936,13 +12936,13 @@
       "labels": [],
       "body": "This PR removes the use of a single packet number space on multiple paths as a fully supported option. However, it currently doesn't remove it entirely.\r\nSpecifically, it moves the respective text for now into the appendix but still allows the reception of packets without a Connection ID on multiple validated paths, similarly as path migration is not strictly forbidden without connection ID.",
       "createdAt": "2022-10-21T15:46:36Z",
-      "updatedAt": "2023-01-18T14:31:33Z",
+      "updatedAt": "2023-01-21T06:39:19Z",
       "baseRepository": "quicwg/multipath",
       "baseRefName": "main",
       "baseRefOid": "749aa03ec09471f0ba5b533ac540bfdec7ab8e6b",
       "headRepository": "quicwg/multipath",
       "headRefName": "mirjak-rm-spns",
-      "headRefOid": "811ddce711d29d337799732ff411c615d93649fc",
+      "headRefOid": "ebb1a36453eeda6c04d378c2b2b7d5878e756a06",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -13378,6 +13378,90 @@
               "updatedAt": "2023-01-14T12:56:29Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5LLtCd",
+          "commit": {
+            "abbreviatedOid": "13e6610"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-01-19T09:00:04Z",
+          "updatedAt": "2023-01-19T09:00:04Z",
+          "comments": [
+            {
+              "originalPosition": 73,
+              "body": "Just committed 13e6610576 to address this.",
+              "createdAt": "2023-01-19T09:00:04Z",
+              "updatedAt": "2023-01-19T09:00:04Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5LLtQz",
+          "commit": {
+            "abbreviatedOid": "13e6610"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "With my added commit (13e661057), LGTM. @mirjak, could you just double-check it? If this is ok, I think we can merge.",
+          "createdAt": "2023-01-19T09:00:41Z",
+          "updatedAt": "2023-01-19T09:03:10Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5LKt3X",
+          "commit": {
+            "abbreviatedOid": "13e6610"
+          },
+          "author": "yfmascgy",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2023-01-19T04:30:01Z",
+          "updatedAt": "2023-01-20T04:35:55Z",
+          "comments": [
+            {
+              "originalPosition": 356,
+              "body": "The figure needs to be modified. Now we only have one path ID type, which I think is cleaner. I will submit another PR to update the figure accordingly once this PR is merged",
+              "createdAt": "2023-01-19T04:30:01Z",
+              "updatedAt": "2023-01-20T04:35:55Z"
+            },
+            {
+              "originalPosition": 50,
+              "body": "I agree. Now we remove zero-length CID and the path ID's definition is more clear and we don't need to consider alternative definitions.",
+              "createdAt": "2023-01-19T04:34:26Z",
+              "updatedAt": "2023-01-20T04:35:55Z"
+            },
+            {
+              "originalPosition": 67,
+              "body": "> Maybe it can be addressed later, but given that the Path Identifier and the PNS ID are now always the same, we may simplify this section and only introduce one concept (i.e., the Path Identifier).\r\n\r\nI agree. This will further simplify the concepts people need to digest.",
+              "createdAt": "2023-01-19T04:35:39Z",
+              "updatedAt": "2023-01-20T04:35:55Z"
+            },
+            {
+              "originalPosition": 317,
+              "body": "SHOULD be send -> SHOULD be sent",
+              "createdAt": "2023-01-19T04:40:35Z",
+              "updatedAt": "2023-01-20T04:35:55Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5LYDAM",
+          "commit": {
+            "abbreviatedOid": "ebb1a36"
+          },
+          "author": "huitema",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "Yes, I approve. It looks very much like I remember of my first review of this PR, with nice fixes.",
+          "createdAt": "2023-01-21T06:39:19Z",
+          "updatedAt": "2023-01-21T06:39:19Z",
+          "comments": []
         }
       ]
     }
