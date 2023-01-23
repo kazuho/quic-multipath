@@ -5,7 +5,7 @@
 QUIC Working Group                                           Y. Liu, Ed.
 Internet-Draft                                                     Y. Ma
 Intended status: Standards Track                            Alibaba Inc.
-Expires: 26 July 2023                                 Q. De Coninck, Ed.
+Expires: 27 July 2023                                 Q. De Coninck, Ed.
                                                                UCLouvain
                                                           O. Bonaventure
                                                   UCLouvain and Tessares
@@ -13,7 +13,7 @@ Expires: 26 July 2023                                 Q. De Coninck, Ed.
                                                     Private Octopus Inc.
                                                       M. Kuehlewind, Ed.
                                                                 Ericsson
-                                                         22 January 2023
+                                                         23 January 2023
 
 
                       Multipath Extension for QUIC
@@ -51,7 +51,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 26 July 2023.
+   This Internet-Draft will expire on 27 July 2023.
 
 Copyright Notice
 
@@ -958,7 +958,7 @@ Table of Contents
 
      PATH_ABANDON Frame {
        Type (i) = TBD-02 (experiments use 0xbaba05),
-       Packet Number Space Identifier (i),
+       Path Identifier (i),
        Error Code (i),
        Reason Phrase Length (i),
        Reason Phrase (..),
@@ -1001,7 +1001,7 @@ Table of Contents
 
      PATH_STATUS Frame {
        Type (i) = TBD-03 (experiments use 0xbaba06),
-       Packet Number Space Identifier (i),
+       Path Identifier (i),
        Path Status sequence number (i),
        Path Status (i),
      }
