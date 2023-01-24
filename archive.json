@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2023-01-22T00:51:57.616379+00:00",
+  "timestamp": "2023-01-24T00:51:07.042453+00:00",
   "repo": "quicwg/multipath",
   "labels": [
     {
@@ -3165,15 +3165,15 @@
       "id": "I_kwDOGNtpaM5RLIxi",
       "title": "Multipath transport parameter should negotiate which version of the draft we are using",
       "url": "https://github.com/quicwg/multipath/issues/139",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "qdeconinck",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "Now that we are starting seeing several multipath implementations and interoperability works between them, it could be useful to keep in mind to negotiate different transport parameter values when raising new draft versions, especially if we are going to add new frames and/or change their type ids.",
       "createdAt": "2022-09-05T12:31:41Z",
-      "updatedAt": "2022-10-21T16:04:08Z",
-      "closedAt": null,
+      "updatedAt": "2023-01-23T17:52:38Z",
+      "closedAt": "2023-01-23T17:52:38Z",
       "comments": [
         {
           "author": "obonaventure",
@@ -3230,6 +3230,13 @@
           "body": "For this version, if until the draft cut-off we do not merge anything breaking and only included clarification/editorial changes, I would be ok. But starting from the next version, I would expect different TP values.\r\n\r\nI don't actually expect any additional text, but that was rather an issue I raised when we kept the same TP value while PATH_STATUS was present in one version but not the other. Of course, we can add some text in a \"to be removed before being an RFC\" section to specify this, but this is not required for me.",
           "createdAt": "2022-10-21T16:04:08Z",
           "updatedAt": "2022-10-21T16:04:08Z"
+        },
+        {
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "body": "PR #149 was merged with a new value. Will close this issue now.",
+          "createdAt": "2023-01-23T17:52:38Z",
+          "updatedAt": "2023-01-23T17:52:38Z"
         }
       ]
     },
@@ -3507,15 +3514,15 @@
       "id": "I_kwDOGNtpaM5XrIoe",
       "title": "Any implementations of multipath quic?",
       "url": "https://github.com/quicwg/multipath/issues/153",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "nandsky",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "Is there any multipath implementations besides xquic (\"https://github.com/alibaba/xquic/tree/beta/multipath-ietf-draft-01\") ?\r\n\r\nI would appreciate for any help.",
       "createdAt": "2022-12-01T08:57:21Z",
-      "updatedAt": "2022-12-01T10:26:47Z",
-      "closedAt": null,
+      "updatedAt": "2023-01-23T17:51:03Z",
+      "closedAt": "2023-01-23T17:51:02Z",
       "comments": [
         {
           "author": "qdeconinck",
@@ -3523,8 +3530,55 @@
           "body": "To my knowledge, there are two other open-source implementations of Multipath QUIC: picoquic (https://github.com/private-octopus/picoquic) and \"work-in-progress\" Cloudflare's quiche (https://github.com/cloudflare/quiche/pull/1310). However, the specifications will again have breaking changes soon and I don't think we started interoperability tests yet (so beware for dragons). ",
           "createdAt": "2022-12-01T10:26:47Z",
           "updatedAt": "2022-12-01T10:26:47Z"
+        },
+        {
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "body": "This is a question that is better suited for the mailing list. Feel free to shoot an email to quic@ietf.org ! But I will close this issue for now!",
+          "createdAt": "2023-01-23T17:51:02Z",
+          "updatedAt": "2023-01-23T17:51:02Z"
         }
       ]
+    },
+    {
+      "number": 154,
+      "id": "I_kwDOGNtpaM5cgyXW",
+      "title": "Only use either Path ID or PNS ID",
+      "url": "https://github.com/quicwg/multipath/issues/154",
+      "state": "OPEN",
+      "author": "mirjak",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "From PR #149 from @qdeconinck:\r\n\r\n> Maybe it can be addressed later, but given that the Path Identifier and the PNS ID are now always the same, we may simplify this section and only introduce one concept (i.e., the Path Identifier).",
+      "createdAt": "2023-01-22T12:24:23Z",
+      "updatedAt": "2023-01-22T12:25:14Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Let's do another editorial pass and evil. some re-org first and then address this issue. I think we all already agreed that we only need one of the two. So we only need to decide with name we keep.",
+          "createdAt": "2023-01-22T12:25:14Z",
+          "updatedAt": "2023-01-22T12:25:14Z"
+        }
+      ]
+    },
+    {
+      "number": 155,
+      "id": "I_kwDOGNtpaM5cgyhk",
+      "title": "Get rid of the Identifier Type for the PATH_ABANDON and PATH_STATUS frames",
+      "url": "https://github.com/quicwg/multipath/issues/155",
+      "state": "OPEN",
+      "author": "mirjak",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "From PR #149 by @qdeconinck:\r\n\r\n> We can of course delegate this on a subsequent PR, but I think we should get rid of the Identifier Type for the PATH_ABANDON and PATH_STATUS frames. Also, I wonder it the value 1 should rather be the default (given https://github.com/quicwg/multipath/issues/137).",
+      "createdAt": "2023-01-22T12:26:58Z",
+      "updatedAt": "2023-01-22T12:26:58Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -12929,24 +12983,26 @@
       "id": "PR_kwDOGNtpaM5BTAft",
       "title": "First proposal to \"remove\" single packet number space option",
       "url": "https://github.com/quicwg/multipath/pull/149",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "mirjak",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "This PR removes the use of a single packet number space on multiple paths as a fully supported option. However, it currently doesn't remove it entirely.\r\nSpecifically, it moves the respective text for now into the appendix but still allows the reception of packets without a Connection ID on multiple validated paths, similarly as path migration is not strictly forbidden without connection ID.",
       "createdAt": "2022-10-21T15:46:36Z",
-      "updatedAt": "2023-01-21T06:39:19Z",
+      "updatedAt": "2023-01-22T12:20:20Z",
       "baseRepository": "quicwg/multipath",
       "baseRefName": "main",
       "baseRefOid": "749aa03ec09471f0ba5b533ac540bfdec7ab8e6b",
       "headRepository": "quicwg/multipath",
       "headRefName": "mirjak-rm-spns",
       "headRefOid": "ebb1a36453eeda6c04d378c2b2b7d5878e756a06",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2023-01-22T12:20:20Z",
+      "mergedAt": "2023-01-22T12:20:20Z",
+      "mergedBy": "mirjak",
+      "mergeCommit": {
+        "oid": "7ae9ca752468438613029fdb4d30d6197de13cb4"
+      },
       "comments": [
         {
           "author": "mirjak",
@@ -13461,6 +13517,132 @@
           "body": "Yes, I approve. It looks very much like I remember of my first review of this PR, with nice fixes.",
           "createdAt": "2023-01-21T06:39:19Z",
           "updatedAt": "2023-01-21T06:39:19Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 156,
+      "id": "PR_kwDOGNtpaM5IRppS",
+      "title": "Remove identifier type",
+      "url": "https://github.com/quicwg/multipath/pull/156",
+      "state": "OPEN",
+      "author": "mirjak",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "fixes #155",
+      "createdAt": "2023-01-22T12:37:53Z",
+      "updatedAt": "2023-01-23T11:39:06Z",
+      "baseRepository": "quicwg/multipath",
+      "baseRefName": "main",
+      "baseRefOid": "7ae9ca752468438613029fdb4d30d6197de13cb4",
+      "headRepository": "quicwg/multipath",
+      "headRefName": "mirjak-patch-9",
+      "headRefOid": "a663f5acf6a396f12811ca3fd4c625f62c3cd161",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGNtpaM5LYr2d",
+          "commit": {
+            "abbreviatedOid": "62f3452"
+          },
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-01-22T12:39:41Z",
+          "updatedAt": "2023-01-22T12:39:42Z",
+          "comments": [
+            {
+              "originalPosition": 68,
+              "body": "```suggestion\r\nPath Identifier:\r\n```",
+              "createdAt": "2023-01-22T12:39:41Z",
+              "updatedAt": "2023-01-22T12:39:42Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5LYr24",
+          "commit": {
+            "abbreviatedOid": "62f3452"
+          },
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-01-22T12:39:53Z",
+          "updatedAt": "2023-01-22T12:39:53Z",
+          "comments": [
+            {
+              "originalPosition": 88,
+              "body": "```suggestion\r\non any path, not only the path identified by the Packet Number Space\r\n```",
+              "createdAt": "2023-01-22T12:39:53Z",
+              "updatedAt": "2023-01-22T12:39:53Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5Lam1N",
+          "commit": {
+            "abbreviatedOid": "f493cc8"
+          },
+          "author": "Yanmei-Liu",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "I agree that we could simplify the Path Identifier field and remove the type of it, but it's a little confusing using both Path Identifier and PNS Identifier in the PATH_STATUS / PATH_ABANDON Frame format.\r\n\r\nI suggest using Path Identifier(i) in PATH_STATUS / PATH_ABANDON Frame, using Packet Number Space Identifier in ACK_MP and 1-RTT packets.",
+          "createdAt": "2023-01-23T09:43:40Z",
+          "updatedAt": "2023-01-23T10:11:21Z",
+          "comments": [
+            {
+              "originalPosition": 33,
+              "body": "_Path Identifier (i),_ ",
+              "createdAt": "2023-01-23T10:00:35Z",
+              "updatedAt": "2023-01-23T10:11:21Z"
+            },
+            {
+              "originalPosition": 98,
+              "body": "_Path Identifier (i),_",
+              "createdAt": "2023-01-23T10:00:52Z",
+              "updatedAt": "2023-01-23T10:11:21Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5La3LP",
+          "commit": {
+            "abbreviatedOid": "f493cc8"
+          },
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-01-23T10:26:05Z",
+          "updatedAt": "2023-01-23T10:26:05Z",
+          "comments": [
+            {
+              "originalPosition": 98,
+              "body": "That was an oversight. Fixed now! Thanks!",
+              "createdAt": "2023-01-23T10:26:05Z",
+              "updatedAt": "2023-01-23T10:26:06Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5LbQrF",
+          "commit": {
+            "abbreviatedOid": "a663f5a"
+          },
+          "author": "Yanmei-Liu",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "Looks good to me",
+          "createdAt": "2023-01-23T11:39:06Z",
+          "updatedAt": "2023-01-23T11:39:06Z",
           "comments": []
         }
       ]
