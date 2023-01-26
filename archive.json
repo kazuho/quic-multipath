@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2023-01-24T00:51:07.042453+00:00",
+  "timestamp": "2023-01-26T00:47:16.868617+00:00",
   "repo": "quicwg/multipath",
   "labels": [
     {
@@ -3577,6 +3577,70 @@
       "body": "From PR #149 by @qdeconinck:\r\n\r\n> We can of course delegate this on a subsequent PR, but I think we should get rid of the Identifier Type for the PATH_ABANDON and PATH_STATUS frames. Also, I wonder it the value 1 should rather be the default (given https://github.com/quicwg/multipath/issues/137).",
       "createdAt": "2023-01-22T12:26:58Z",
       "updatedAt": "2023-01-22T12:26:58Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 157,
+      "id": "I_kwDOGNtpaM5ctG8D",
+      "title": "Error code for missing CID during handshake",
+      "url": "https://github.com/quicwg/multipath/issues/157",
+      "state": "OPEN",
+      "author": "mirjak",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Which the newly merged PR #149, the doc now says:\r\n\r\n\"If the parameter is set to 1, both endpoints MUST use non-zero connection IDs. If an enable_multipath parameter set to 1 is received and the carrying packet does not contain a non-zero length connection ID, the receiver MUST treat this as a connection error of type TRANSPORT_PARAMETER_ERROR (specified in {{Section 20.1 of QUIC-TRANSPORT}}) and close the connection.\"\r\n\r\nIs it okay to use the TRANSPORT_PARAMETER_ERROR code for this or do we need a different/new one?",
+      "createdAt": "2023-01-24T16:54:22Z",
+      "updatedAt": "2023-01-24T16:54:22Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 158,
+      "id": "I_kwDOGNtpaM5ctIPi",
+      "title": "Clarify use of RETIRE_CONNECTION_ID frame",
+      "url": "https://github.com/quicwg/multipath/issues/158",
+      "state": "OPEN",
+      "author": "mirjak",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "RFC 9000 defines a way to request a peer to retire old CIDs, but only in-sequence (i.e., all CIDs with a sequence number less than n). This doesn't work when multiple CIDs are in use over different paths and you only want to retire one of them.\r\n\r\n(issue originally raised by @michael-eriksson)",
+      "createdAt": "2023-01-24T16:58:02Z",
+      "updatedAt": "2023-01-24T16:58:02Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 159,
+      "id": "I_kwDOGNtpaM5ctJba",
+      "title": "Clarify that there are no limitations on the use of server IP address",
+      "url": "https://github.com/quicwg/multipath/issues/159",
+      "state": "OPEN",
+      "author": "mirjak",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This draft only enables clients to open a new path, so the most common scenario is that the client has another interface and opens a new path from a new IP address. However, if the client knows another IP that the server is listing on to accept new paths for an existing quic connection (e.g. provided on the higher layer or out of band), that can be used as well. It would be useful to discussion this case more in the draft to ensure that it is clear that this case is supported.",
+      "createdAt": "2023-01-24T17:01:16Z",
+      "updatedAt": "2023-01-24T17:01:16Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 160,
+      "id": "I_kwDOGNtpaM5ctL1R",
+      "title": "Clarify support of migration",
+      "url": "https://github.com/quicwg/multipath/issues/160",
+      "state": "OPEN",
+      "author": "mirjak",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "RFC9000 allows endpoints to change the CID any time on a path. So it's not automatically a new path if a new CID is seen. This should be noted explicitly in the draft.\r\n\r\nFurther, also migration can happened without endpoint control (NAT rebinding). In this case the server will see a new 4-tuple but no CID change. In line with RFC9000 the server should start path validation and then the client should use a new CID. In case of multipath support we need to clarify if and when this is treated as a new path. If seen as a new path, we would probably need to close the old one (which however is not functional anymore). However, if e.g. only the port number changes, RFC9000 also would also to not reset the congestion control. In this case it would make sense to not treat it as a new path.",
+      "createdAt": "2023-01-24T17:07:23Z",
+      "updatedAt": "2023-01-24T17:07:23Z",
       "closedAt": null,
       "comments": []
     }
