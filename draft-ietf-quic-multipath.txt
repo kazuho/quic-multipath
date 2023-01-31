@@ -5,7 +5,7 @@
 QUIC Working Group                                           Y. Liu, Ed.
 Internet-Draft                                                     Y. Ma
 Intended status: Standards Track                            Alibaba Inc.
-Expires: 26 July 2023                                 Q. De Coninck, Ed.
+Expires: 4 August 2023                                Q. De Coninck, Ed.
                                                                UCLouvain
                                                           O. Bonaventure
                                                   UCLouvain and Tessares
@@ -13,7 +13,7 @@ Expires: 26 July 2023                                 Q. De Coninck, Ed.
                                                     Private Octopus Inc.
                                                       M. Kuehlewind, Ed.
                                                                 Ericsson
-                                                         22 January 2023
+                                                         31 January 2023
 
 
                       Multipath Extension for QUIC
@@ -51,7 +51,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 26 July 2023.
+   This Internet-Draft will expire on 4 August 2023.
 
 Copyright Notice
 
@@ -350,7 +350,7 @@ Table of Contents
 
    An endpoint uses PATH_STATUS frames to inform that the peer should
    send packets in the preference expressed by these frames.  Notice
-   that the endpoint might not follow the peer's advertisements, but the
+   that the endpoint might not follow the peer’s advertisements, but the
    PATH_STATUS frame is still a clear signal of suggestion for the
    preference of path usage by the peer.
 
@@ -363,7 +363,7 @@ Table of Contents
       sent on that path if another path is available.
 
    Endpoints use Path Identifier field in PATH_STATUS frame to identify
-   which path's state is going to be changed.  Notice that PATH_STATUS
+   which path’s state is going to be changed.  Notice that PATH_STATUS
    frame can be sent via a different path.  An Endpoint MAY ignore the
    PATH_STATUS frame if it would make all the paths unavailable in a
    single connection.
@@ -894,11 +894,10 @@ Table of Contents
    use DCID S3, which has a sequence number of 3.  Note that the paths
    use different packet number spaces.  In this case, the client is
    going to close the first path.  It identifies the path by the
-   sequence number of the received packet's DCID over that path (path
-   identifier type 0x00), hence using the path_id 1.  Optionally, the
-   server confirms the path closure by sending an PATH_ABANDON frame
-   using the sequence number of the received packet's DCID over that
-   path (path identifier type 0x00) as path identifier, which
+   sequence number of the received packet's DCID over that path, hence
+   using the path_id 1.  Optionally, the server confirms the path
+   closure by sending an PATH_ABANDON frame using the sequence number of
+   the received packet's DCID over that path as path identifier, which
    corresponds to the path_id 2.  Both the client and the server can
    close the path after receiving the RETIRE_CONNECTION_ID frame for
    that path.
@@ -906,9 +905,9 @@ Table of Contents
    Client                                                      Server
 
    (client tells server to abandon a path)
-   1-RTT[X]: DCID=S2 PATH_ABANDON[path_id_type=0, path_id=1]->
+   1-RTT[X]: DCID=S2 PATH_ABANDON[path_id=1]->
                               (server tells client to abandon a path)
-         <-1-RTT[Y]: DCID=C1 PATH_ABANDON[path_id_type=0, path_id=2],
+                         <-1-RTT[Y]: DCID=C1 PATH_ABANDON[path_id=2],
                                                   ACK_MP[Seq=2, PN=X]
    (client retires the corresponding CID)
    1-RTT[U]: DCID=S3 RETIRE_CONNECTION_ID[2], ACK_MP[Seq=1, PN=Y] ->
@@ -959,7 +958,7 @@ Table of Contents
 
      PATH_ABANDON Frame {
        Type (i) = TBD-02 (experiments use 0xbaba05),
-       Path Identifier (..),
+       Path Identifier (i),
        Error Code (i),
        Reason Phrase Length (i),
        Reason Phrase (..),
@@ -969,35 +968,8 @@ Table of Contents
 
    PATH_ABANDON frames contain the following fields:
 
-   Path Identifier: An identifier of the path, which is formatted as
-   shown in Figure 5.
-
-   *  Identifier Type: Identifier Type field is set to indicate the type
-      of path identifier.
-
-      -  Type 0: Refer to the connection identifier issued by the sender
-         of the control frame.  Note that this is the connection
-         identifier used by the peer when sending packets on the to-be-
-         closed path.  This method SHOULD be used by default.
-
-      -  Type 1: Refer to the connection identifier issued by the
-         receiver of the control frame.  Note that this is the
-         connection identifier used by the sender when sending packets
-         on the to-be-closed path.
-
-      -  Type 2: Refer to the path over which the control frame is sent
-         or received.
-
-   *  Path Identifier Content: A variable-length integer specifying the
-      path identifier.  If Identifier Type is 2, the Path Identifier
-      Content MUST be empty.
-
-     Path Identifier {
-       Identifier Type (i) = 0x00..0x02,
-       [Path Identifier Content (i)],
-     }
-
-                      Figure 5: Path Identifier Format
+   Path Identifier:  The identifier of the path that should be
+      abandoned.
 
    Error Code:  A variable-length integer that indicates the reason for
       abandoning this path.
@@ -1017,39 +989,36 @@ Table of Contents
    PATH_ABANDON frames SHOULD be acknowledged.  If a packet containing a
    PATH_ABANDON frame is considered lost, the peer SHOULD repeat it.
 
-   If the Identifier Type is 0x00 or 0x01, PATH_ABANDON frames MAY be
-   sent on any path, not only the path identified by the Path Identifier
-   Content field.  If the Identifier Type if 0x02, the PATH_ABANDON
-   frame MUST only be sent on the path that is intended to be abandoned.
+   PATH_ABANDON frames MAY be sent on any path, not only the path
+   identified by the Packet Number Space Identifier.
 
 12.2.  PATH_STATUS frame
 
    PATH_STATUS Frame are used by endpoints to inform the peer of the
    current status of one path, and the peer should send packets
    according to the preference expressed in these frames.  PATH_STATUS
-   frames are formatted as shown in Figure 6.
+   frames are formatted as shown in Figure 5.
 
      PATH_STATUS Frame {
        Type (i) = TBD-03 (experiments use 0xbaba06),
-       Path Identifier (..),
+       Path Identifier (i),
        Path Status sequence number (i),
        Path Status (i),
      }
 
-                     Figure 6: PATH_STATUS Frame Format
+                     Figure 5: PATH_STATUS Frame Format
 
    PATH_STATUS Frames contain the following fields:
 
-   Path Identifier: An identifier of the path, which is formatted as
-   shown in Figure 5.  Exactly the same as the definition of Path
-   Identifier in {#path-abandon-frame}.
+   Path Identifier:  The identifier of the path that the status update
+      correspondes to.
 
-   Path Status sequence number: A variable-length integer specifying the
-   sequence number assigned for this PATH_STATUS frame.  The sequence
-   number MUST be monotonically increasing generated by the sender of
-   the Path Status frame in the same connection.  The receiver of the
-   Path Status frame needs to use and compare the sequence numbers
-   separately for each Path Identifier.
+   Path Status sequence number:  A variable-length integer specifying
+      the sequence number assigned for this PATH_STATUS frame.  The
+      sequence number MUST be monotonically increasing generated by the
+      sender of the Path Status frame in the same connection.  The
+      receiver of the Path Status frame needs to use and compare the
+      sequence numbers separately for each Path Identifier.
 
    Available values of Path Status field are:
 
@@ -1084,7 +1053,7 @@ Table of Contents
    packets with associated ECN marks received on the connection up to
    this point.
 
-   ACK_MP frame is formatted as shown in Figure 7.
+   ACK_MP frame is formatted as shown in Figure 6.
 
      ACK_MP Frame {
        Type (i) = TBD-00..TBD-01 (experiments use 0xbaba00..0xbaba01),
@@ -1097,14 +1066,15 @@ Table of Contents
        [ECN Counts (..)],
      }
 
-                       Figure 7: ACK_MP Frame Format
+                       Figure 6: ACK_MP Frame Format
 
    Compared to the ACK frame specified in [QUIC-TRANSPORT], the
    following field is added.
 
-   Packet Number Space Identifier: An identifier of the path packet
-   number space, which is the sequence number of Destination Connection
-   ID of the 1-RTT packets which are acknowledged by the ACK_MP frame.
+   Packet Number Space Identifier:  The identifier of the path packet
+      number space of the 1-RTT packets which are acknowledged by the
+      ACK_MP frame.
+
    If an endpoint receives an ACK_MP frame with a packet number space ID
    which was never issued by endpoints (i.e., with a sequence number
    larger than the largest one advertised), it MUST treat this as a
