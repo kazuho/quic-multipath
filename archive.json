@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2023-01-26T00:47:16.868617+00:00",
+  "timestamp": "2023-01-31T00:51:57.051177+00:00",
   "repo": "quicwg/multipath",
   "labels": [
     {
@@ -3641,6 +3641,22 @@
       "body": "RFC9000 allows endpoints to change the CID any time on a path. So it's not automatically a new path if a new CID is seen. This should be noted explicitly in the draft.\r\n\r\nFurther, also migration can happened without endpoint control (NAT rebinding). In this case the server will see a new 4-tuple but no CID change. In line with RFC9000 the server should start path validation and then the client should use a new CID. In case of multipath support we need to clarify if and when this is treated as a new path. If seen as a new path, we would probably need to close the old one (which however is not functional anymore). However, if e.g. only the port number changes, RFC9000 also would also to not reset the congestion control. In this case it would make sense to not treat it as a new path.",
       "createdAt": "2023-01-24T17:07:23Z",
       "updatedAt": "2023-01-24T17:07:23Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 162,
+      "id": "I_kwDOGNtpaM5dJcsq",
+      "title": "Use of normative language for congestion control",
+      "url": "https://github.com/quicwg/multipath/issues/162",
+      "state": "OPEN",
+      "author": "mirjak",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Currently the draft say:\r\n\r\n> Senders MUST manage per-path congestion status, and MUST NOT send more data on a given path than congestion control on that path allows. This is already a requirement of [[QUIC-TRANSPORT](https://quicwg.org/multipath/draft-ietf-quic-multipath.html#QUIC-TRANSPORT)].[\u00b6](https://quicwg.org/multipath/draft-ietf-quic-multipath.html#section-5-1)\r\n\r\nHowever, we should not use normative language in this draft but just point to RFC9000 instead as things are defined normatively there already.\r\n\r\nBtw. this reference should point to section 13.3 (\"Upon detecting losses, a sender MUST take appropriate congestion control action.\") and 9.4 (\"Packets sent on the old path MUST NOT contribute to congestion control or RTT estimation for the new path.\") of RFC9000 specifically and maybe also to RFC9002 directly.",
+      "createdAt": "2023-01-30T16:21:39Z",
+      "updatedAt": "2023-01-30T16:21:39Z",
       "closedAt": null,
       "comments": []
     }
@@ -13710,6 +13726,32 @@
           "comments": []
         }
       ]
+    },
+    {
+      "number": 161,
+      "id": "PR_kwDOGNtpaM5I1LcG",
+      "title": "Move most text of former PNS/CID section to where it belongs",
+      "url": "https://github.com/quicwg/multipath/pull/161",
+      "state": "OPEN",
+      "author": "mirjak",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This is the first PR of 3-4 editorial passes I'm planning to do. This first PR only move existing text into the right place. I did not change anything in the text (except the section heading).\r\n\r\nThe next round will move some sections entirely (e.g. section on congestion control, RTT calculation, packet scheduling could maybe go into the implementation considerations) and then I'm planning to do a full edit pass at the end to check consistency. Would be great if we could review and merge this one soon, so I can move on with the next one. I'm keeping those PRs separately so it is easier to follow the changes.",
+      "createdAt": "2023-01-30T16:12:24Z",
+      "updatedAt": "2023-01-30T16:12:46Z",
+      "baseRepository": "quicwg/multipath",
+      "baseRefName": "main",
+      "baseRefOid": "7ae9ca752468438613029fdb4d30d6197de13cb4",
+      "headRepository": "quicwg/multipath",
+      "headRefName": "mirjak-patch-10",
+      "headRefOid": "90ca3345a1c3b93abe7f2c796285c81b53c6fa64",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
