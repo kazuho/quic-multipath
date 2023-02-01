@@ -5,7 +5,7 @@
 QUIC Working Group                                           Y. Liu, Ed.
 Internet-Draft                                                     Y. Ma
 Intended status: Standards Track                            Alibaba Inc.
-Expires: 4 August 2023                                Q. De Coninck, Ed.
+Expires: 5 August 2023                                Q. De Coninck, Ed.
                                                                UCLouvain
                                                           O. Bonaventure
                                                   UCLouvain and Tessares
@@ -13,7 +13,7 @@ Expires: 4 August 2023                                Q. De Coninck, Ed.
                                                     Private Octopus Inc.
                                                       M. Kuehlewind, Ed.
                                                                 Ericsson
-                                                         31 January 2023
+                                                         1 February 2023
 
 
                       Multipath Extension for QUIC
@@ -51,7 +51,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 4 August 2023.
+   This Internet-Draft will expire on 5 August 2023.
 
 Copyright Notice
 
@@ -86,28 +86,27 @@ Table of Contents
    6.  Computing Path RTT
    7.  Packet Scheduling
    8.  Recovery
-   9.  Path ID, Connection ID, Packet Number Spaces, and
-           Acknowledgements
-     9.1.  Packet Protection
-     9.2.  Key Update
-   10. Examples
-     10.1.  Path Establishment
-     10.2.  Path Closure
-   11. Implementation Considerations
-     11.1.  Handling different PMTU sizes
-     11.2.  Keep Alive
-   12. New Frames
-     12.1.  PATH_ABANDON Frame
-     12.2.  PATH_STATUS frame
-     12.3.  ACK_MP Frame
-   13. Error Codes
-   14. IANA Considerations
-   15. Security Considerations
-   16. Contributors
-   17. Acknowledgments
-   18. References
-     18.1.  Normative References
-     18.2.  Informative References
+   9.  Sending Acknowledgements
+   10. Packet Protection
+   11. Key Update
+   12. Examples
+     12.1.  Path Establishment
+     12.2.  Path Closure
+   13. Implementation Considerations
+     13.1.  Handling different PMTU sizes
+     13.2.  Keep Alive
+   14. New Frames
+     14.1.  PATH_ABANDON Frame
+     14.2.  PATH_STATUS frame
+     14.3.  ACK_MP Frame
+   15. Error Codes
+   16. IANA Considerations
+   17. Security Considerations
+   18. Contributors
+   19. Acknowledgments
+   20. References
+     20.1.  Normative References
+     20.2.  Informative References
    Authors' Addresses
 
 1.  Introduction
@@ -221,6 +220,13 @@ Table of Contents
    which is the sequence number of the connection ID, when a new path is
    established.
 
+   The initial path that is used during the handshake (and multipath
+   negotiation) has the path ID 0 and therefore all 0-RTT packets are
+   also tracked and processed with the path ID 0.  For 1-RTT packets,
+   the path ID is the sequence number of the Destination Connection ID
+   present in the packet header, as defined in Section 5.1.1 of
+   [QUIC-TRANSPORT].
+
 2.  High-level overview
 
    The multipath extensions to QUIC proposed in this document enable the
@@ -254,6 +260,10 @@ Table of Contents
    of active paths and how they are used to send packets.  As these
    differ depending on the application's requirements, their
    specification is out of scope of this document.
+
+   Using multiple packet number spaces requires changes in the way AEAD
+   is applied for packet protection, as explained in Section 10, and
+   tighter constraints for key updates, as explained in Section 11.
 
 3.  Handshake Negotiation and Transport Parameter
 
@@ -322,14 +332,30 @@ Table of Contents
    a client decides to initiate a new path.  We delegate such discussion
    in separate documents.
 
+   To open a new path, an endpoint SHALL use different Connection IDs on
+   different paths.  Still, the receiver may observe the same Connection
+   ID used on different 4-tuples due to, e.g., NAT rebinding.  In such
+   case, the receiver reacts as specified in Section 9.3 of
+   [QUIC-TRANSPORT].
+
    This proposal adds one multipath control frame for path management:
 
    *  PATH_ABANDON frame for the receiver side to abandon the path (see
-      Section 12.1)
+      Section 14.1)
 
    All the new frames are sent in 1-RTT packets [QUIC-TRANSPORT].
 
 4.1.  Path Initiation
+
+   Following [QUIC-TRANSPORT], each endpoint uses NEW_CONNECTION_ID
+   frames to issue usable connections IDs to reach it.  Before an
+   endpoint adds a new path by initiating path validation, it MUST check
+   whether at least one unused Connection ID is available for each side.
+
+   If the transport parameter "active_connection_id_limit" is negotiated
+   as N, the server provided N Connection IDs, and the client is already
+   actively using N paths, the limit is reached.  If the client wants to
+   start a new path, it has to retire one of the established paths.
 
    When the multipath option is negotiated, clients that want to use an
    additional path MUST first initiate the Address Validation procedure
@@ -395,7 +421,7 @@ Table of Contents
 4.3.1.  Use PATH_ABANDON Frame to Close a Path
 
    Both endpoints, namely the client and the server, can close a path,
-   by sending PATH_ABANDON frame (see Section 12.1) which abandons the
+   by sending PATH_ABANDON frame (see Section 14.1) which abandons the
    path with a corresponding Path Identifier.  Once a path is marked as
    "abandoned", it means that the resources related to the path, such as
    the used connection IDs, can be released.  However, information
@@ -701,32 +727,9 @@ Table of Contents
    While this document does not preclude a specific strategy, more
    detailed specification is out of scope.
 
-9.  Path ID, Connection ID, Packet Number Spaces, and Acknowledgements
+9.  Sending Acknowledgements
 
-   ToDo: Restructure this section; however, keeping changes minimal for
-   now!
-
-   The initial path that is used during the handshake (and multipath
-   negotiation) has the path ID 0 and therefore all 0-RTT packets are
-   also tracked and processed with the path ID 0.  For 1-RTT packets,
-   the path ID is the sequence number of the Destination Connection ID
-   present in the packet header, as defined in Section 5.1.1 of
-   [QUIC-TRANSPORT].
-
-   To open a new path, an endpoint SHALL use different Connection IDs on
-   different paths.  Still, the receiver may observe the same Connection
-   ID used on different 4-tuples due to, e.g., NAT rebinding.  In such
-   case, the receiver reacts as specified in Section 9.3 of
-   [QUIC-TRANSPORT].
-
-   Acknowledgements of Initial and Handshake packets MUST be carried
-   using ACK frames, as specified in [QUIC-TRANSPORT].  The ACK frames,
-   as defined in [QUIC-TRANSPORT], do not carry path identifiers.  If
-   for any reason ACK frames are received in 1-RTT packets while the
-   state of multipath negotiation is ambiguous, they MUST be interpreted
-   as acknowledging packets sent on path 0.
-
-   The ACK_MP frame, as specified in Section 12.3, is used to
+   The ACK_MP frame, as specified in Section 14.3, is used to
    acknowledge 1-RTT packets.  Compared to the QUIC version 1 ACK frame,
    the ACK_MP frames additionally contains a Packet Number Space
    Identifier (PN Space ID).  The PN Space ID used to distinguish packet
@@ -735,31 +738,24 @@ Table of Contents
    number space for 1-RTT packets can be identified based on the
    Destination Connection ID in each packet.
 
+   Acknowledgements of Initial and Handshake packets MUST be carried
+   using ACK frames, as specified in [QUIC-TRANSPORT].  The ACK frames,
+   as defined in [QUIC-TRANSPORT], do not carry path identifiers.  If
+   for any reason ACK frames are received in 1-RTT packets while the
+   state of multipath negotiation is ambiguous, they MUST be interpreted
+   as acknowledging packets sent on path 0.
+
    As soon as the negotiation of multipath support is completed,
    endpoints SHOULD use ACK_MP frames instead of ACK frames to
    acknowledge application data packets, including 0-RTT packets,
    received on path ID 0 after the handshake concluded.
 
-   Following [QUIC-TRANSPORT], each endpoint uses NEW_CONNECTION_ID
-   frames to issue usable connections IDs to reach it.  Before an
-   endpoint adds a new path by initiating path validation, it MUST check
-   whether at least one unused Connection ID is available for each side.
-
-   If the transport parameter "active_connection_id_limit" is negotiated
-   as N, the server provided N Connection IDs, and the client is already
-   actively using N paths, the limit is reached.  If the client wants to
-   start a new path, it has to retire one of the established paths.
-
-   ACK_MP frame (defined in Section 12.3) SHOULD be sent on the same
+   ACK_MP frame (defined in Section 14.3) SHOULD be sent on the same
    path as identified by the Path Identifier.  However, an ACK_MP frame
    can be returned via a different path, based on different strategies
    of sending ACK_MP frames.
 
-   Using multiple packet number spaces requires changes in the way AEAD
-   is applied for packet protection, as explained in Section 9.1, and
-   tighter constraints for key updates, as explained in Section 9.2.
-
-9.1.  Packet Protection
+10.  Packet Protection
 
    Packet protection for QUIC version 1 is specified in Section 5 of
    [QUIC-TLS].  The general principles of packet protection are not
@@ -797,7 +793,7 @@ Table of Contents
    connection ID sequence number is 3, and the packet number is aead,
    the nonce will be set to 6b2611489cba2b63a9e873e2.
 
-9.2.  Key Update
+11.  Key Update
 
    The Key Phase bit update process for QUIC version 1 is specified in
    Section 6 of [QUIC-TLS].  The general principles of key update are
@@ -836,9 +832,9 @@ Table of Contents
    so sending multiple packets with Key Phase bit flipping at the same
    time should not cause linkability issue.
 
-10.  Examples
+12.  Examples
 
-10.1.  Path Establishment
+12.1.  Path Establishment
 
    Figure 2 illustrates an example of new path establishment using
    multiple packet number spaces.
@@ -879,7 +875,7 @@ Table of Contents
    is desired to provide one more connection ID as currently in use, to
    allow for new paths or migration.
 
-10.2.  Path Closure
+12.2.  Path Closure
 
    In this example, the client detects the network environment change
    (client's 4G/Wi-Fi is turned off, Wi-Fi signal is fading to a
@@ -916,9 +912,9 @@ Table of Contents
 
                     Figure 3: Example of closing a path.
 
-11.  Implementation Considerations
+13.  Implementation Considerations
 
-11.1.  Handling different PMTU sizes
+13.1.  Handling different PMTU sizes
 
    An implementation should take care to handle different PMTU sizes
    across multiple paths.  One simple option if the PMTUs are relatively
@@ -927,7 +923,7 @@ Table of Contents
    as the content of lost packets initially sent on one path can be sent
    on another path without further frame scheduling adaptations.
 
-11.2.  Keep Alive
+13.2.  Keep Alive
 
    The QUIC specification defines an optional keep alive process, see
    Section 5.3 of [QUIC-TRANSPORT].  Implementations of the multipath
@@ -939,7 +935,7 @@ Table of Contents
    paths to keep alive, it can do so by sending Ping frames on each of
    these paths before the idle timeout expires.
 
-12.  New Frames
+14.  New Frames
 
    All the new frames MUST only be sent in 1-RTT packet, and MUST NOT
    use other encryption levels.
@@ -948,7 +944,7 @@ Table of Contents
    other encryption levels, it MUST return MP_PROTOCOL_VIOLATION as a
    connection error and close the connection.
 
-12.1.  PATH_ABANDON Frame
+14.1.  PATH_ABANDON Frame
 
    The PATH_ABANDON frame informs the peer to abandon a path.  More
    complex path management can be made possible with additional
@@ -992,7 +988,7 @@ Table of Contents
    PATH_ABANDON frames MAY be sent on any path, not only the path
    identified by the Packet Number Space Identifier.
 
-12.2.  PATH_STATUS frame
+14.2.  PATH_STATUS frame
 
    PATH_STATUS Frame are used by endpoints to inform the peer of the
    current status of one path, and the peer should send packets
@@ -1043,7 +1039,7 @@ Table of Contents
    if it was the last status sent for that path -- as indicated by the
    sequence number.
 
-12.3.  ACK_MP Frame
+14.3.  ACK_MP Frame
 
    The ACK_MP frame (types TBD-00 and TBD-01; experiments use
    0xbaba00..0xbaba01) is an extension of the ACK frame defined by
@@ -1084,7 +1080,7 @@ Table of Contents
    RETIRE_CONNECTION_ID frame or belonging to closed paths), it MUST
    ignore the ACK_MP frame without causing a connection error.
 
-13.  Error Codes
+15.  Error Codes
 
    Multipath QUIC transport error codes are 62-bit unsigned integers
    following [QUIC-TRANSPORT].
@@ -1097,7 +1093,7 @@ Table of Contents
    an error with protocol compliance that was not covered by more
    specific error codes.
 
-14.  IANA Considerations
+16.  IANA Considerations
 
    This document defines a new transport parameter for the negotiation
    of enable multiple paths for QUIC, and three new frame types.  The
@@ -1122,13 +1118,13 @@ Table of Contents
       +==============================+==============+===============+
       | Value                        | Frame Name   | Specification |
       +==============================+==============+===============+
-      | TBD-00 - TBD-01 (experiments | ACK_MP       | Section 12.3  |
+      | TBD-00 - TBD-01 (experiments | ACK_MP       | Section 14.3  |
       | use 0xbaba00-0xbaba01)       |              |               |
       +------------------------------+--------------+---------------+
-      | TBD-02 (experiments use      | PATH_ABANDON | Section 12.1  |
+      | TBD-02 (experiments use      | PATH_ABANDON | Section 14.1  |
       | 0xbaba05)                    |              |               |
       +------------------------------+--------------+---------------+
-      | TBD-03 (experiments use      | PATH_STATUS  | Section 12.2  |
+      | TBD-03 (experiments use      | PATH_STATUS  | Section 14.2  |
       | 0xbaba06)                    |              |               |
       +------------------------------+--------------+---------------+
 
@@ -1141,18 +1137,18 @@ Table of Contents
    +==============+=======================+===========+===============+
    | Value        | Code                  |Description| Specification |
    +==============+=======================+===========+===============+
-   | TBD          | MP_PROTOCOL_VIOLATION |Multipath  | Section 13    |
+   | TBD          | MP_PROTOCOL_VIOLATION |Multipath  | Section 15    |
    | (experiments |                       |protocol   |               |
    | use 0xba01)  |                       |violation  |               |
    +--------------+-----------------------+-----------+---------------+
 
                   Table 5: Error Code for Multipath QUIC
 
-15.  Security Considerations
+17.  Security Considerations
 
    TBD
 
-16.  Contributors
+18.  Contributors
 
    This document is a collaboration of authors that combines work from
    three proposals.  Further contributors that were also involved one of
@@ -1162,13 +1158,13 @@ Table of Contents
 
    *  Zhenyu Li
 
-17.  Acknowledgments
+19.  Acknowledgments
 
    TBD
 
-18.  References
+20.  References
 
-18.1.  Normative References
+20.1.  Normative References
 
    [QUIC-TLS] Thomson, M., Ed. and S. Turner, Ed., "Using TLS to Secure
               QUIC", RFC 9001, DOI 10.17487/RFC9001, May 2021,
@@ -1193,7 +1189,7 @@ Table of Contents
               2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
               May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
 
-18.2.  Informative References
+20.2.  Informative References
 
    [I-D.bonaventure-iccrg-schedulers]
               Bonaventure, O., Piraux, M., De Coninck, Q., Baerts, M.,
