@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2023-01-31T00:51:57.051177+00:00",
+  "timestamp": "2023-02-02T00:50:09.783919+00:00",
   "repo": "quicwg/multipath",
   "labels": [
     {
@@ -3552,7 +3552,7 @@
       "labels": [],
       "body": "From PR #149 from @qdeconinck:\r\n\r\n> Maybe it can be addressed later, but given that the Path Identifier and the PNS ID are now always the same, we may simplify this section and only introduce one concept (i.e., the Path Identifier).",
       "createdAt": "2023-01-22T12:24:23Z",
-      "updatedAt": "2023-01-22T12:25:14Z",
+      "updatedAt": "2023-02-01T08:58:37Z",
       "closedAt": null,
       "comments": [
         {
@@ -3561,6 +3561,13 @@
           "body": "Let's do another editorial pass and evil. some re-org first and then address this issue. I think we all already agreed that we only need one of the two. So we only need to decide with name we keep.",
           "createdAt": "2023-01-22T12:25:14Z",
           "updatedAt": "2023-01-22T12:25:14Z"
+        },
+        {
+          "author": "yfmascgy",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I prefer to use the name \"Path ID\", as it is more intuitive in the context of multipath.",
+          "createdAt": "2023-02-01T08:58:37Z",
+          "updatedAt": "2023-02-01T08:58:37Z"
         }
       ]
     },
@@ -3569,15 +3576,15 @@
       "id": "I_kwDOGNtpaM5cgyhk",
       "title": "Get rid of the Identifier Type for the PATH_ABANDON and PATH_STATUS frames",
       "url": "https://github.com/quicwg/multipath/issues/155",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "mirjak",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "From PR #149 by @qdeconinck:\r\n\r\n> We can of course delegate this on a subsequent PR, but I think we should get rid of the Identifier Type for the PATH_ABANDON and PATH_STATUS frames. Also, I wonder it the value 1 should rather be the default (given https://github.com/quicwg/multipath/issues/137).",
       "createdAt": "2023-01-22T12:26:58Z",
-      "updatedAt": "2023-01-22T12:26:58Z",
-      "closedAt": null,
+      "updatedAt": "2023-01-31T03:16:54Z",
+      "closedAt": "2023-01-31T03:16:54Z",
       "comments": []
     },
     {
@@ -3592,9 +3599,17 @@
       "labels": [],
       "body": "Which the newly merged PR #149, the doc now says:\r\n\r\n\"If the parameter is set to 1, both endpoints MUST use non-zero connection IDs. If an enable_multipath parameter set to 1 is received and the carrying packet does not contain a non-zero length connection ID, the receiver MUST treat this as a connection error of type TRANSPORT_PARAMETER_ERROR (specified in {{Section 20.1 of QUIC-TRANSPORT}}) and close the connection.\"\r\n\r\nIs it okay to use the TRANSPORT_PARAMETER_ERROR code for this or do we need a different/new one?",
       "createdAt": "2023-01-24T16:54:22Z",
-      "updatedAt": "2023-01-24T16:54:22Z",
+      "updatedAt": "2023-02-01T09:08:48Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "yfmascgy",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I think it should be Okay. Basically, if a packet uses zero-length CID, the enable_multipath parameter should not be set to 1, and when it does, it is a TRANSPORT_PARAMETER_ERROR.",
+          "createdAt": "2023-02-01T09:08:48Z",
+          "updatedAt": "2023-02-01T09:08:48Z"
+        }
+      ]
     },
     {
       "number": 158,
@@ -13606,24 +13621,26 @@
       "id": "PR_kwDOGNtpaM5IRppS",
       "title": "Remove identifier type",
       "url": "https://github.com/quicwg/multipath/pull/156",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "mirjak",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "fixes #155",
       "createdAt": "2023-01-22T12:37:53Z",
-      "updatedAt": "2023-01-23T11:39:06Z",
+      "updatedAt": "2023-01-31T03:16:53Z",
       "baseRepository": "quicwg/multipath",
       "baseRefName": "main",
       "baseRefOid": "7ae9ca752468438613029fdb4d30d6197de13cb4",
       "headRepository": "quicwg/multipath",
       "headRefName": "mirjak-patch-9",
       "headRefOid": "a663f5acf6a396f12811ca3fd4c625f62c3cd161",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2023-01-31T03:16:53Z",
+      "mergedAt": "2023-01-31T03:16:53Z",
+      "mergedBy": "Yanmei-Liu",
+      "mergeCommit": {
+        "oid": "9e53ad51ce2762555bb18f0f73f93a310b4947fb"
+      },
       "comments": [],
       "reviews": [
         {
@@ -13732,26 +13749,102 @@
       "id": "PR_kwDOGNtpaM5I1LcG",
       "title": "Move most text of former PNS/CID section to where it belongs",
       "url": "https://github.com/quicwg/multipath/pull/161",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "mirjak",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "This is the first PR of 3-4 editorial passes I'm planning to do. This first PR only move existing text into the right place. I did not change anything in the text (except the section heading).\r\n\r\nThe next round will move some sections entirely (e.g. section on congestion control, RTT calculation, packet scheduling could maybe go into the implementation considerations) and then I'm planning to do a full edit pass at the end to check consistency. Would be great if we could review and merge this one soon, so I can move on with the next one. I'm keeping those PRs separately so it is easier to follow the changes.",
       "createdAt": "2023-01-30T16:12:24Z",
-      "updatedAt": "2023-01-30T16:12:46Z",
+      "updatedAt": "2023-02-01T09:24:26Z",
       "baseRepository": "quicwg/multipath",
       "baseRefName": "main",
       "baseRefOid": "7ae9ca752468438613029fdb4d30d6197de13cb4",
       "headRepository": "quicwg/multipath",
       "headRefName": "mirjak-patch-10",
       "headRefOid": "90ca3345a1c3b93abe7f2c796285c81b53c6fa64",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2023-02-01T09:24:26Z",
+      "mergedAt": "2023-02-01T09:24:25Z",
+      "mergedBy": "Yanmei-Liu",
+      "mergeCommit": {
+        "oid": "528e7f076203f05db2be891a6fa026b478e91bb4"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGNtpaM5MNA6S",
+          "commit": {
+            "abbreviatedOid": "90ca334"
+          },
+          "author": "Yanmei-Liu",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "Basically very useful restructure. Looks good to me. ",
+          "createdAt": "2023-02-01T06:08:29Z",
+          "updatedAt": "2023-02-01T06:15:56Z",
+          "comments": [
+            {
+              "originalPosition": 9,
+              "body": "I'd suggest that we only keep Line 192 to 194, it's useful for readers to understand the initial path identifier.\r\nLine 195 to 197 is very similar with the definition of Path Identifier in Line 175 to 177.\r\n",
+              "createdAt": "2023-02-01T06:08:30Z",
+              "updatedAt": "2023-02-01T06:15:57Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5MNv_5",
+          "commit": {
+            "abbreviatedOid": "90ca334"
+          },
+          "author": "yfmascgy",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "Loos good to me:)",
+          "createdAt": "2023-02-01T08:56:45Z",
+          "updatedAt": "2023-02-01T08:56:45Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5MN1sp",
+          "commit": {
+            "abbreviatedOid": "90ca334"
+          },
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-02-01T09:11:13Z",
+          "updatedAt": "2023-02-01T09:11:14Z",
+          "comments": [
+            {
+              "originalPosition": 9,
+              "body": "I'm planning to do that in a separate PR when we also remove the PNS ID (and only have path ID).",
+              "createdAt": "2023-02-01T09:11:13Z",
+              "updatedAt": "2023-02-01T09:11:14Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5MN6cS",
+          "commit": {
+            "abbreviatedOid": "90ca334"
+          },
+          "author": "Yanmei-Liu",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-02-01T09:22:54Z",
+          "updatedAt": "2023-02-01T09:22:54Z",
+          "comments": [
+            {
+              "originalPosition": 9,
+              "body": "That's ok.",
+              "createdAt": "2023-02-01T09:22:54Z",
+              "updatedAt": "2023-02-01T09:22:54Z"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
