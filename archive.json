@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2023-02-02T00:50:09.783919+00:00",
+  "timestamp": "2023-02-05T00:53:40.470370+00:00",
   "repo": "quicwg/multipath",
   "labels": [
     {
@@ -13845,6 +13845,32 @@
           ]
         }
       ]
+    },
+    {
+      "number": 163,
+      "id": "PR_kwDOGNtpaM5JMg88",
+      "title": "Move sections to impl consideration and new section heading on MPNSes",
+      "url": "https://github.com/quicwg/multipath/pull/163",
+      "state": "OPEN",
+      "author": "mirjak",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Restructuring part II:\r\n- This moves section on congestion control, packet scheduling, RTT calculation, and retransmission into the implementation guidance. These section don't contain normative language but only guidance (expect the congestion control one but that should probably be removed or potentially moved, see issue #162). None of the text is changed.\r\n- Add a new section heading on \"multipath operation with MPNSes\" that clusters the sections on ack handling and protection as those things are impacted (normatively) by the introduction of MPNSes. No changes in the text accept some intro sentences to this new section heading.",
+      "createdAt": "2023-02-03T11:39:09Z",
+      "updatedAt": "2023-02-03T11:39:09Z",
+      "baseRepository": "quicwg/multipath",
+      "baseRefName": "main",
+      "baseRefOid": "528e7f076203f05db2be891a6fa026b478e91bb4",
+      "headRepository": "quicwg/multipath",
+      "headRefName": "mirjak-patch-11",
+      "headRefOid": "2fa205f79729f623f9610b7f0b37edc6f5c3adac",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
