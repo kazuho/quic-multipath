@@ -5,7 +5,7 @@
 QUIC Working Group                                           Y. Liu, Ed.
 Internet-Draft                                                     Y. Ma
 Intended status: Standards Track                            Alibaba Inc.
-Expires: 7 August 2023                                Q. De Coninck, Ed.
+Expires: 10 August 2023                               Q. De Coninck, Ed.
                                                                UCLouvain
                                                           O. Bonaventure
                                                   UCLouvain and Tessares
@@ -13,7 +13,7 @@ Expires: 7 August 2023                                Q. De Coninck, Ed.
                                                     Private Octopus Inc.
                                                       M. Kuehlewind, Ed.
                                                                 Ericsson
-                                                         3 February 2023
+                                                         6 February 2023
 
 
                       Multipath Extension for QUIC
@@ -51,7 +51,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 7 August 2023.
+   This Internet-Draft will expire on 10 August 2023.
 
 Copyright Notice
 
@@ -344,7 +344,7 @@ Table of Contents
    *  PATH_ABANDON frame for the receiver side to abandon the path (see
       Section 8.1)
 
-   *  PATH_STATUS frames to express a preference in path usage (see
+   *  PATH_STATUS frame to express a preference in path usage (see
       Section 8.2
 
    All the new frames are sent in 1-RTT packets [QUIC-TRANSPORT].
@@ -628,11 +628,11 @@ Table of Contents
 
 5.  Multipath Operation with Multiple Packet Number Spaces
 
-   The QUIC multipath exetnsion uses different packet number spaces for
+   The QUIC multipath extension uses different packet number spaces for
    each path.  This also means that the same packet number can occur on
    each path and the packet number is not a unique identifier anymore.
    This requires changes to the ACK frame as well as packet protection
-   as descibed in the following subsections.
+   as described in the following subsections.
 
 5.1.  Sending Acknowledgements
 
