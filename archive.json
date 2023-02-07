@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2023-02-05T00:53:40.470370+00:00",
+  "timestamp": "2023-02-07T00:50:00.272735+00:00",
   "repo": "quicwg/multipath",
   "labels": [
     {
@@ -3599,7 +3599,7 @@
       "labels": [],
       "body": "Which the newly merged PR #149, the doc now says:\r\n\r\n\"If the parameter is set to 1, both endpoints MUST use non-zero connection IDs. If an enable_multipath parameter set to 1 is received and the carrying packet does not contain a non-zero length connection ID, the receiver MUST treat this as a connection error of type TRANSPORT_PARAMETER_ERROR (specified in {{Section 20.1 of QUIC-TRANSPORT}}) and close the connection.\"\r\n\r\nIs it okay to use the TRANSPORT_PARAMETER_ERROR code for this or do we need a different/new one?",
       "createdAt": "2023-01-24T16:54:22Z",
-      "updatedAt": "2023-02-01T09:08:48Z",
+      "updatedAt": "2023-02-06T14:49:30Z",
       "closedAt": null,
       "comments": [
         {
@@ -3608,6 +3608,13 @@
           "body": "I think it should be Okay. Basically, if a packet uses zero-length CID, the enable_multipath parameter should not be set to 1, and when it does, it is a TRANSPORT_PARAMETER_ERROR.",
           "createdAt": "2023-02-01T09:08:48Z",
           "updatedAt": "2023-02-01T09:08:48Z"
+        },
+        {
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I agree with the TRANSPORT_PARAMETER_ERROR solution (not sure it is valuable to define a new value here).",
+          "createdAt": "2023-02-06T14:49:30Z",
+          "updatedAt": "2023-02-06T14:49:30Z"
         }
       ]
     },
@@ -13858,19 +13865,66 @@
       "labels": [],
       "body": "Restructuring part II:\r\n- This moves section on congestion control, packet scheduling, RTT calculation, and retransmission into the implementation guidance. These section don't contain normative language but only guidance (expect the congestion control one but that should probably be removed or potentially moved, see issue #162). None of the text is changed.\r\n- Add a new section heading on \"multipath operation with MPNSes\" that clusters the sections on ack handling and protection as those things are impacted (normatively) by the introduction of MPNSes. No changes in the text accept some intro sentences to this new section heading.",
       "createdAt": "2023-02-03T11:39:09Z",
-      "updatedAt": "2023-02-03T11:39:09Z",
+      "updatedAt": "2023-02-06T17:03:40Z",
       "baseRepository": "quicwg/multipath",
       "baseRefName": "main",
       "baseRefOid": "528e7f076203f05db2be891a6fa026b478e91bb4",
       "headRepository": "quicwg/multipath",
       "headRefName": "mirjak-patch-11",
-      "headRefOid": "2fa205f79729f623f9610b7f0b37edc6f5c3adac",
+      "headRefOid": "e61dbe79caa2692872e1396e5d982646b5872bf0",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGNtpaM5MnRUY",
+          "commit": {
+            "abbreviatedOid": "2fa205f"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "Minor typos, otherwise LGTM.",
+          "createdAt": "2023-02-06T14:55:39Z",
+          "updatedAt": "2023-02-06T14:58:02Z",
+          "comments": [
+            {
+              "originalPosition": 21,
+              "body": "```suggestion\r\nThe QUIC multipath extension uses different packet number spaces for each path.\r\n```",
+              "createdAt": "2023-02-06T14:55:39Z",
+              "updatedAt": "2023-02-06T14:58:03Z"
+            },
+            {
+              "originalPosition": 24,
+              "body": "```suggestion\r\nthe ACK frame as well as packet protection as described in the following subsections.\r\n```",
+              "createdAt": "2023-02-06T14:56:08Z",
+              "updatedAt": "2023-02-06T14:58:03Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5MnSsR",
+          "commit": {
+            "abbreviatedOid": "2fa205f"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-02-06T14:58:30Z",
+          "updatedAt": "2023-02-06T14:58:31Z",
+          "comments": [
+            {
+              "originalPosition": 9,
+              "body": "```suggestion\r\n- PATH_STATUS frame to express a preference in path usage\r\n```",
+              "createdAt": "2023-02-06T14:58:30Z",
+              "updatedAt": "2023-02-06T14:58:31Z"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
