@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2023-02-09T00:48:22.060722+00:00",
+  "timestamp": "2023-02-14T00:52:14.818334+00:00",
   "repo": "quicwg/multipath",
   "labels": [
     {
@@ -3679,6 +3679,22 @@
       "body": "Currently the draft say:\r\n\r\n> Senders MUST manage per-path congestion status, and MUST NOT send more data on a given path than congestion control on that path allows. This is already a requirement of [[QUIC-TRANSPORT](https://quicwg.org/multipath/draft-ietf-quic-multipath.html#QUIC-TRANSPORT)].[\u00b6](https://quicwg.org/multipath/draft-ietf-quic-multipath.html#section-5-1)\r\n\r\nHowever, we should not use normative language in this draft but just point to RFC9000 instead as things are defined normatively there already.\r\n\r\nBtw. this reference should point to section 13.3 (\"Upon detecting losses, a sender MUST take appropriate congestion control action.\") and 9.4 (\"Packets sent on the old path MUST NOT contribute to congestion control or RTT estimation for the new path.\") of RFC9000 specifically and maybe also to RFC9002 directly.",
       "createdAt": "2023-01-30T16:21:39Z",
       "updatedAt": "2023-01-30T16:21:39Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 164,
+      "id": "I_kwDOGNtpaM5eTtp2",
+      "title": "Unclear (inconsistent?) mapping of Path ID in PATH_STATUS and PATH_ABANDON frames",
+      "url": "https://github.com/quicwg/multipath/issues/164",
+      "state": "OPEN",
+      "author": "qdeconinck",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Since #156, we now define the Path ID as (Section 1.1)\r\n```\r\nthe sequence number of the destination Connection ID\r\nused for sending packets on that particular path.\r\n```\r\n\r\nAnd the definition of the `Path ID` as the field of PATH_ABANDON and PATH_STATUS frames directly maps to that identifier path (i.e., the sequence number of the destination Connection ID used for sending packets on that particular path, Sections 8.1 and 8.2).\r\n\r\nBut in Section 6.2, the example states that \r\n```\r\n[the Path ID] identifies the path by the sequence number of the received packet's DCID over that path\r\n```\r\n\r\nI believe the current text is unclear and should be fixed. Yet, I see two possible ways of doing so. We should either state that\r\n\r\n- the `Path ID` field of these frames refer to the Path ID used by the receiver of the frame, or\r\n- add some information to indicate that it refers to the Path ID viewed from the sender's/receiver's viewpoint (that could be encoded as a bit in the frame's type)",
+      "createdAt": "2023-02-13T12:05:04Z",
+      "updatedAt": "2023-02-13T12:05:04Z",
       "closedAt": null,
       "comments": []
     }
