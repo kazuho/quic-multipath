@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2023-02-14T00:52:14.818334+00:00",
+  "timestamp": "2023-02-16T00:51:40.886449+00:00",
   "repo": "quicwg/multipath",
   "labels": [
     {
@@ -72,6 +72,11 @@
       "name": "needs-discussion",
       "description": "",
       "color": "F1217E"
+    },
+    {
+      "name": "no-action-needed",
+      "description": "",
+      "color": "439B49"
     }
   ],
   "issues": [
@@ -3442,7 +3447,7 @@
       "id": "I_kwDOGNtpaM5UjYPB",
       "title": "How to identify path initiation with zero-length connection ID?",
       "url": "https://github.com/quicwg/multipath/issues/151",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "mirjak",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -3451,16 +3456,24 @@
       ],
       "body": "If I received a packet on a new 5-tuple with a connection ID, I can associate it to an existing QUIC connection. However, if the packet does not have a connection ID, I can't. So I guess to make multipath work without use of connection IDs, whenever I receive a potential QUIC packet on any 5-tuple (that is not an initial packet or version negotiated packet), I would need to try to decrypt it with all possible keys of all open quic connections (or at least the one that don't use a connection ID). Do we really want to support that?\r\n\r\nI guess you can always just drop certain packets and only try to decrypt packets with the same destination address and port, or with a destination address and port that was somehow previously announced to the client. However, we should further discuss this in the draft or decide to require a connection ID (at least for the additional path; maybe the initial path could still have zero-length connection ID?).",
       "createdAt": "2022-10-21T16:05:24Z",
-      "updatedAt": "2022-11-03T09:04:01Z",
-      "closedAt": null,
-      "comments": []
+      "updatedAt": "2023-02-14T14:54:25Z",
+      "closedAt": "2023-02-14T14:54:25Z",
+      "comments": [
+        {
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "body": "out-dated with merge of #149 ",
+          "createdAt": "2023-02-14T14:54:25Z",
+          "updatedAt": "2023-02-14T14:54:25Z"
+        }
+      ]
     },
     {
       "number": 152,
       "id": "I_kwDOGNtpaM5Ujbg0",
       "title": "Do we want to support zero-length connection ID and therefore single packet number space?",
       "url": "https://github.com/quicwg/multipath/issues/152",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "mirjak",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -3469,8 +3482,8 @@
       ],
       "body": "I created a PR that moves the single packet number space option into the appendix: #149 \r\n\r\nThis PR still support zero-length connection ID on the initial path and it also still supports reception of packets with zero-length connection ID (given path migration with zero-length ID is also not strictly forbidden). However, it requires the sender to use a non-zero connection ID when opening an additional path and recommends to send non ack-elicting packet only over one active path.\r\n\r\nThe intention is to leave the door open for experimentation but still make the spec shorter and more concise. However, I guess we could also decide to remove the single packet number space discussion entirely from this draft, or even allow zero-length connection ID packets only for migration but not for simultaneous use.",
       "createdAt": "2022-10-21T16:17:51Z",
-      "updatedAt": "2022-11-09T14:15:39Z",
-      "closedAt": null,
+      "updatedAt": "2023-02-14T14:57:21Z",
+      "closedAt": "2023-02-14T14:57:21Z",
       "comments": [
         {
           "author": "nibanks",
@@ -3506,6 +3519,13 @@
           "body": "> This is more of a question, but is there a privacy concern by trying to establish a new path when zero-length CID is used?\r\n> \r\n> [RFC 9000 section 9.5](https://www.rfc-editor.org/rfc/rfc9000.html#section-9.5-7) states that:\r\n> \r\n> > An endpoint SHOULD NOT initiate migration with a peer that has requested a zero-length connection ID, because traffic over the new path might be trivially linkable to traffic over the old one. If the server is able to associate packets with a zero-length connection ID to the right connection, it means that the server is using other information to demultiplex packets. For example, a server might provide a unique address to every client -- for instance, using HTTP alternative services [[ALTSVC](https://www.rfc-editor.org/rfc/rfc9000.html#ALTSVC)]. Information that might allow correct routing of packets across multiple network paths will also allow activity on those paths to be linked by entities other than the peer.\r\n> \r\n> IIUC, when zero-length CID is being used on a multipath QUIC connection, paths shared by the connection would be trivially linkable, regardless of if a non-zero-length CID is used to establish a new path.\r\n> \r\n> Assuming that is the case, I think we have to discourage endpoints from using zero-length CIDs with multipath QUIC as well, even if we are to provide support for that.\r\n\r\nWhy would the paths be \"trivially linkable\"? In the normal case, they would have different client IP addresses--how would the paths otherwise go different ways through the network?\r\n\r\nFWIW, I think it is quite straight forward to use multiple PN spaces and zero-length client CIDs.",
           "createdAt": "2022-11-09T14:15:38Z",
           "updatedAt": "2022-11-09T14:15:38Z"
+        },
+        {
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Closing this issue for now as PR #149 was merged. We can open a separate new issue on the question if we still want to enable server-to-client zero-CID with multiple packet number spaces.",
+          "createdAt": "2023-02-14T14:57:21Z",
+          "updatedAt": "2023-02-14T14:57:21Z"
         }
       ]
     },
@@ -3549,18 +3569,21 @@
       "author": "mirjak",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "has PR",
+        "design"
+      ],
       "body": "From PR #149 from @qdeconinck:\r\n\r\n> Maybe it can be addressed later, but given that the Path Identifier and the PNS ID are now always the same, we may simplify this section and only introduce one concept (i.e., the Path Identifier).",
       "createdAt": "2023-01-22T12:24:23Z",
-      "updatedAt": "2023-02-01T08:58:37Z",
+      "updatedAt": "2023-02-15T08:40:42Z",
       "closedAt": null,
       "comments": [
         {
           "author": "mirjak",
           "authorAssociation": "COLLABORATOR",
-          "body": "Let's do another editorial pass and evil. some re-org first and then address this issue. I think we all already agreed that we only need one of the two. So we only need to decide with name we keep.",
+          "body": "Let's do another editorial pass and evtl. some re-org first and then address this issue. I think we all already agreed that we only need one of the two. So we only need to decide with name we keep.",
           "createdAt": "2023-01-22T12:25:14Z",
-          "updatedAt": "2023-01-22T12:25:14Z"
+          "updatedAt": "2023-02-14T14:58:37Z"
         },
         {
           "author": "yfmascgy",
@@ -3596,10 +3619,13 @@
       "author": "mirjak",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "design",
+        "no-action-needed"
+      ],
       "body": "Which the newly merged PR #149, the doc now says:\r\n\r\n\"If the parameter is set to 1, both endpoints MUST use non-zero connection IDs. If an enable_multipath parameter set to 1 is received and the carrying packet does not contain a non-zero length connection ID, the receiver MUST treat this as a connection error of type TRANSPORT_PARAMETER_ERROR (specified in {{Section 20.1 of QUIC-TRANSPORT}}) and close the connection.\"\r\n\r\nIs it okay to use the TRANSPORT_PARAMETER_ERROR code for this or do we need a different/new one?",
       "createdAt": "2023-01-24T16:54:22Z",
-      "updatedAt": "2023-02-06T14:49:30Z",
+      "updatedAt": "2023-02-14T14:53:11Z",
       "closedAt": null,
       "comments": [
         {
@@ -3615,6 +3641,13 @@
           "body": "I agree with the TRANSPORT_PARAMETER_ERROR solution (not sure it is valuable to define a new value here).",
           "createdAt": "2023-02-06T14:49:30Z",
           "updatedAt": "2023-02-06T14:49:30Z"
+        },
+        {
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Okay, I think we all agree. I'll leave the issue open until the next meeting to double-check with the group. No action needed so far.",
+          "createdAt": "2023-02-14T14:51:44Z",
+          "updatedAt": "2023-02-14T14:51:44Z"
         }
       ]
     },
@@ -3675,10 +3708,12 @@
       "author": "mirjak",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "has PR"
+      ],
       "body": "Currently the draft say:\r\n\r\n> Senders MUST manage per-path congestion status, and MUST NOT send more data on a given path than congestion control on that path allows. This is already a requirement of [[QUIC-TRANSPORT](https://quicwg.org/multipath/draft-ietf-quic-multipath.html#QUIC-TRANSPORT)].[\u00b6](https://quicwg.org/multipath/draft-ietf-quic-multipath.html#section-5-1)\r\n\r\nHowever, we should not use normative language in this draft but just point to RFC9000 instead as things are defined normatively there already.\r\n\r\nBtw. this reference should point to section 13.3 (\"Upon detecting losses, a sender MUST take appropriate congestion control action.\") and 9.4 (\"Packets sent on the old path MUST NOT contribute to congestion control or RTT estimation for the new path.\") of RFC9000 specifically and maybe also to RFC9002 directly.",
       "createdAt": "2023-01-30T16:21:39Z",
-      "updatedAt": "2023-01-30T16:21:39Z",
+      "updatedAt": "2023-02-14T14:52:43Z",
       "closedAt": null,
       "comments": []
     },
@@ -3691,12 +3726,37 @@
       "author": "qdeconinck",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "has PR",
+        "editorial"
+      ],
       "body": "Since #156, we now define the Path ID as (Section 1.1)\r\n```\r\nthe sequence number of the destination Connection ID\r\nused for sending packets on that particular path.\r\n```\r\n\r\nAnd the definition of the `Path ID` as the field of PATH_ABANDON and PATH_STATUS frames directly maps to that identifier path (i.e., the sequence number of the destination Connection ID used for sending packets on that particular path, Sections 8.1 and 8.2).\r\n\r\nBut in Section 6.2, the example states that \r\n```\r\n[the Path ID] identifies the path by the sequence number of the received packet's DCID over that path\r\n```\r\n\r\nI believe the current text is unclear and should be fixed. Yet, I see two possible ways of doing so. We should either state that\r\n\r\n- the `Path ID` field of these frames refer to the Path ID used by the receiver of the frame, or\r\n- add some information to indicate that it refers to the Path ID viewed from the sender's/receiver's viewpoint (that could be encoded as a bit in the frame's type)",
       "createdAt": "2023-02-13T12:05:04Z",
-      "updatedAt": "2023-02-13T12:05:04Z",
+      "updatedAt": "2023-02-15T08:29:59Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Is there any use case for either using the sender's or receiver's ID? If not, I'd prefer we simply choose one and define it clearly.",
+          "createdAt": "2023-02-14T14:30:34Z",
+          "updatedAt": "2023-02-14T14:30:34Z"
+        },
+        {
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "body": "(P.S.: I think the text in the example is just wrong. I think I messed this up in #156.)",
+          "createdAt": "2023-02-14T14:32:24Z",
+          "updatedAt": "2023-02-14T14:32:24Z"
+        },
+        {
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "IMHO it makes more sense to me to use the sender's ID by default, especially if we consider only client-initiated paths.",
+          "createdAt": "2023-02-15T08:29:59Z",
+          "updatedAt": "2023-02-15T08:29:59Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -13939,6 +13999,219 @@
               "body": "```suggestion\r\n- PATH_STATUS frame to express a preference in path usage\r\n```",
               "createdAt": "2023-02-06T14:58:30Z",
               "updatedAt": "2023-02-06T14:58:31Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 165,
+      "id": "PR_kwDOGNtpaM5J83z0",
+      "title": "Fix path closure example with path ID",
+      "url": "https://github.com/quicwg/multipath/pull/165",
+      "state": "OPEN",
+      "author": "mirjak",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "fixes #164",
+      "createdAt": "2023-02-14T14:39:57Z",
+      "updatedAt": "2023-02-15T08:32:34Z",
+      "baseRepository": "quicwg/multipath",
+      "baseRefName": "main",
+      "baseRefOid": "9f1d4e26e1df03c0af74e8fdc1978cb6ffb25f3e",
+      "headRepository": "quicwg/multipath",
+      "headRefName": "mirjak-patch-12",
+      "headRefOid": "35c5cc87fc334e5ec834ea3752e1a7abbd851d7e",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGNtpaM5NbWRE",
+          "commit": {
+            "abbreviatedOid": "35c5cc8"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "I would also suggest to slightly update the text related to the `Path ID` field of the PATH_ABANDON and PATH_STATUS frames to indicate it refers to the sender's Path ID.",
+          "createdAt": "2023-02-15T08:30:40Z",
+          "updatedAt": "2023-02-15T08:32:34Z",
+          "comments": [
+            {
+              "originalPosition": 6,
+              "body": "```suggestion\r\nnumber of the DCID it uses for sending packets over that path,\r\n```",
+              "createdAt": "2023-02-15T08:30:40Z",
+              "updatedAt": "2023-02-15T08:32:34Z"
+            },
+            {
+              "originalPosition": 11,
+              "body": "```suggestion\r\nthe sequence number of the DCID it uses to send over that path as path\r\n```",
+              "createdAt": "2023-02-15T08:31:07Z",
+              "updatedAt": "2023-02-15T08:32:34Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 166,
+      "id": "PR_kwDOGNtpaM5J87SE",
+      "title": "Do not use normative language for congestion control",
+      "url": "https://github.com/quicwg/multipath/pull/166",
+      "state": "OPEN",
+      "author": "mirjak",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "as this is already stated normatively in RFC900.\r\n\r\nfixes #162",
+      "createdAt": "2023-02-14T14:50:01Z",
+      "updatedAt": "2023-02-15T08:35:12Z",
+      "baseRepository": "quicwg/multipath",
+      "baseRefName": "main",
+      "baseRefOid": "9f1d4e26e1df03c0af74e8fdc1978cb6ffb25f3e",
+      "headRepository": "quicwg/multipath",
+      "headRefName": "mirjak-patch-13",
+      "headRefOid": "d5abd04cd4961f8243e08c8f00b2dbb03861364b",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGNtpaM5NWqeY",
+          "commit": {
+            "abbreviatedOid": "e6cef4f"
+          },
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-02-14T15:03:42Z",
+          "updatedAt": "2023-02-14T15:03:42Z",
+          "comments": [
+            {
+              "originalPosition": 7,
+              "body": "```suggestion\r\nWhen the QUIC multipath extension is used, senders manage per-path\r\n```",
+              "createdAt": "2023-02-14T15:03:42Z",
+              "updatedAt": "2023-02-14T15:03:42Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5NWqiO",
+          "commit": {
+            "abbreviatedOid": "e6cef4f"
+          },
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-02-14T15:03:49Z",
+          "updatedAt": "2023-02-14T15:03:50Z",
+          "comments": [
+            {
+              "originalPosition": 13,
+              "body": "```suggestion\r\nThis means a sender is not allowed to send more data on a given path\r\n```",
+              "createdAt": "2023-02-14T15:03:49Z",
+              "updatedAt": "2023-02-14T15:03:50Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5NbX7S",
+          "commit": {
+            "abbreviatedOid": "d5abd04"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "LGTM",
+          "createdAt": "2023-02-15T08:35:05Z",
+          "updatedAt": "2023-02-15T08:35:12Z",
+          "comments": [
+            {
+              "originalPosition": 13,
+              "body": "```suggestion\r\nThis means a sender is not allowed sending more data on a given path\r\n```",
+              "createdAt": "2023-02-15T08:35:05Z",
+              "updatedAt": "2023-02-15T08:35:12Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 167,
+      "id": "PR_kwDOGNtpaM5J9H9d",
+      "title": "Remove PNS ID",
+      "url": "https://github.com/quicwg/multipath/pull/167",
+      "state": "OPEN",
+      "author": "mirjak",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "fixes #154",
+      "createdAt": "2023-02-14T15:22:02Z",
+      "updatedAt": "2023-02-15T08:40:12Z",
+      "baseRepository": "quicwg/multipath",
+      "baseRefName": "main",
+      "baseRefOid": "9f1d4e26e1df03c0af74e8fdc1978cb6ffb25f3e",
+      "headRepository": "quicwg/multipath",
+      "headRefName": "mirjak-patch-14",
+      "headRefOid": "9d5d455f1c6ba8a05166e585845dbee73268070f",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGNtpaM5NW1Zz",
+          "commit": {
+            "abbreviatedOid": "1d86e24"
+          },
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-02-14T15:24:21Z",
+          "updatedAt": "2023-02-14T15:24:22Z",
+          "comments": [
+            {
+              "originalPosition": 29,
+              "body": "```suggestion\r\n  processed with the path ID 0. For 1-RTT packets, the path ID is the\r\n```",
+              "createdAt": "2023-02-14T15:24:21Z",
+              "updatedAt": "2023-02-14T15:24:22Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5NbYbF",
+          "commit": {
+            "abbreviatedOid": "9d5d455"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "Sounds good.",
+          "createdAt": "2023-02-15T08:36:27Z",
+          "updatedAt": "2023-02-15T08:40:11Z",
+          "comments": [
+            {
+              "originalPosition": 3,
+              "body": "```suggestion\r\n  in multipath control frames (e.g., PATH_ABANDON frame) to identify\r\n```",
+              "createdAt": "2023-02-15T08:36:27Z",
+              "updatedAt": "2023-02-15T08:40:12Z"
+            },
+            {
+              "originalPosition": 63,
+              "body": "```suggestion\r\nThe Path ID is used to distinguish packet number spaces for different\r\n```",
+              "createdAt": "2023-02-15T08:37:41Z",
+              "updatedAt": "2023-02-15T08:40:12Z"
             }
           ]
         }
