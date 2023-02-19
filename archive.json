@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2023-02-16T00:51:40.886449+00:00",
+  "timestamp": "2023-02-19T00:52:14.625159+00:00",
   "repo": "quicwg/multipath",
   "labels": [
     {
@@ -3663,9 +3663,17 @@
       "labels": [],
       "body": "RFC 9000 defines a way to request a peer to retire old CIDs, but only in-sequence (i.e., all CIDs with a sequence number less than n). This doesn't work when multiple CIDs are in use over different paths and you only want to retire one of them.\r\n\r\n(issue originally raised by @michael-eriksson)",
       "createdAt": "2023-01-24T16:58:02Z",
-      "updatedAt": "2023-01-24T16:58:02Z",
+      "updatedAt": "2023-02-18T04:31:42Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "yfmascgy",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I think you actually mean the Retire Prior To field in the NEW_CONNECTION_ID frame? In the RETIRE_CONNECTION_ID frame, the sequence number field is the connection ID being retired, so it should be fine, but yes, in the context of multipath, we should apply Retire Prior To field in NEW_CONNECTION_ID with caution. I am wondering shall we say that when multipath is in use, an endpoint SHOULD NOT use Retire Prior To when issuing a new connection ID, but instead, retire CID one by one with the use of RETIRE_CONNECTION_ID frame?",
+          "createdAt": "2023-02-18T04:31:41Z",
+          "updatedAt": "2023-02-18T04:31:41Z"
+        }
+      ]
     },
     {
       "number": 159,
@@ -3679,9 +3687,17 @@
       "labels": [],
       "body": "This draft only enables clients to open a new path, so the most common scenario is that the client has another interface and opens a new path from a new IP address. However, if the client knows another IP that the server is listing on to accept new paths for an existing quic connection (e.g. provided on the higher layer or out of band), that can be used as well. It would be useful to discussion this case more in the draft to ensure that it is clear that this case is supported.",
       "createdAt": "2023-01-24T17:01:16Z",
-      "updatedAt": "2023-01-24T17:01:16Z",
+      "updatedAt": "2023-02-18T03:42:19Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "yfmascgy",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I think as people who implement multipath will mostly refer to this draft, we may want to clarify all scenarios supported by this draft: (1) client has multiple IPs while server listens on single IP, (2) client uses single IP while server listens on multiple IP, and (3) client uses multiple IPs and the server also uses multiple IPs.",
+          "createdAt": "2023-02-18T03:42:18Z",
+          "updatedAt": "2023-02-18T03:42:18Z"
+        }
+      ]
     },
     {
       "number": 160,
@@ -3695,9 +3711,17 @@
       "labels": [],
       "body": "RFC9000 allows endpoints to change the CID any time on a path. So it's not automatically a new path if a new CID is seen. This should be noted explicitly in the draft.\r\n\r\nFurther, also migration can happened without endpoint control (NAT rebinding). In this case the server will see a new 4-tuple but no CID change. In line with RFC9000 the server should start path validation and then the client should use a new CID. In case of multipath support we need to clarify if and when this is treated as a new path. If seen as a new path, we would probably need to close the old one (which however is not functional anymore). However, if e.g. only the port number changes, RFC9000 also would also to not reset the congestion control. In this case it would make sense to not treat it as a new path.",
       "createdAt": "2023-01-24T17:07:23Z",
-      "updatedAt": "2023-01-24T17:07:23Z",
+      "updatedAt": "2023-02-18T05:12:20Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "yfmascgy",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I agree. I think we might add sth like:\r\n<pre>\r\n   New CID ---yes---> new 4-tuple ---yes---> new path\r\n       |                  |\r\n       |                  No\r\n       No                 |\r\n       |                  ---> use new CID on same path\r\n       |\r\n       ----->4-tuple change----yes----> only port number change ----yes----> NAT rebinding ( do not rest CC)\r\n                 |                                 |\r\n                 |                                 No\r\n                 No                                |\r\n                 |                                 -----> connection migration & reset CC\r\n                 |\r\n                  -------> no change\r\n</pre>",
+          "createdAt": "2023-02-18T04:58:15Z",
+          "updatedAt": "2023-02-18T05:12:20Z"
+        }
+      ]
     },
     {
       "number": 162,
@@ -14016,7 +14040,7 @@
       "labels": [],
       "body": "fixes #164",
       "createdAt": "2023-02-14T14:39:57Z",
-      "updatedAt": "2023-02-15T08:32:34Z",
+      "updatedAt": "2023-02-18T04:09:14Z",
       "baseRepository": "quicwg/multipath",
       "baseRefName": "main",
       "baseRefOid": "9f1d4e26e1df03c0af74e8fdc1978cb6ffb25f3e",
@@ -14052,6 +14076,32 @@
               "body": "```suggestion\r\nthe sequence number of the DCID it uses to send over that path as path\r\n```",
               "createdAt": "2023-02-15T08:31:07Z",
               "updatedAt": "2023-02-15T08:32:34Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5NwK9U",
+          "commit": {
+            "abbreviatedOid": "35c5cc8"
+          },
+          "author": "yfmascgy",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "CHANGES_REQUESTED",
+          "body": "",
+          "createdAt": "2023-02-18T04:06:27Z",
+          "updatedAt": "2023-02-18T04:09:14Z",
+          "comments": [
+            {
+              "originalPosition": 28,
+              "body": "```suggestion\r\n1-RTT[U]: DCID=S3 RETIRE_CONNECTION_ID[2], ACK_MP[Seq=1, PN=Y] ->\r\n```\r\nClient wants to retire DCID S2, so the sequence number field in the retire_connection_ID should be 2.",
+              "createdAt": "2023-02-18T04:06:27Z",
+              "updatedAt": "2023-02-18T04:09:14Z"
+            },
+            {
+              "originalPosition": 31,
+              "body": "```suggestion\r\n <- 1-RTT[V]: DCID=C2 RETIRE_CONNECTION_ID[1], ACK_MP[Seq=3, PN=U]\r\n```\r\nServer wants to retire DCID C1, so the sequence number field in the retire_connection_ID should be 1.",
+              "createdAt": "2023-02-18T04:09:03Z",
+              "updatedAt": "2023-02-18T04:09:14Z"
             }
           ]
         }
