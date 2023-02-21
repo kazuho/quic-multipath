@@ -829,7 +829,7 @@ Table of Contents
    such the requirement is to reset the congestion control status on
    path migration.  With the multipath extension, multiple paths can be
    used simultaneously, therefore separate congestion control state is
-   maintained for each path.  This means a sender is not allowed sending
+   maintained for each path.  This means a sender is not allowed to send
    more data on a given path than congestion control for that path
    indicates.
 
