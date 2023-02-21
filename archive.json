@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2023-02-19T00:52:14.625159+00:00",
+  "timestamp": "2023-02-21T00:53:36.552084+00:00",
   "repo": "quicwg/multipath",
   "labels": [
     {
@@ -3663,7 +3663,7 @@
       "labels": [],
       "body": "RFC 9000 defines a way to request a peer to retire old CIDs, but only in-sequence (i.e., all CIDs with a sequence number less than n). This doesn't work when multiple CIDs are in use over different paths and you only want to retire one of them.\r\n\r\n(issue originally raised by @michael-eriksson)",
       "createdAt": "2023-01-24T16:58:02Z",
-      "updatedAt": "2023-02-18T04:31:42Z",
+      "updatedAt": "2023-02-20T11:29:16Z",
       "closedAt": null,
       "comments": [
         {
@@ -3672,6 +3672,20 @@
           "body": "I think you actually mean the Retire Prior To field in the NEW_CONNECTION_ID frame? In the RETIRE_CONNECTION_ID frame, the sequence number field is the connection ID being retired, so it should be fine, but yes, in the context of multipath, we should apply Retire Prior To field in NEW_CONNECTION_ID with caution. I am wondering shall we say that when multipath is in use, an endpoint SHOULD NOT use Retire Prior To when issuing a new connection ID, but instead, retire CID one by one with the use of RETIRE_CONNECTION_ID frame?",
           "createdAt": "2023-02-18T04:31:41Z",
           "updatedAt": "2023-02-18T04:31:41Z"
+        },
+        {
+          "author": "michael-eriksson",
+          "authorAssociation": "NONE",
+          "body": "Yes, I mean that field. Note that the Retire Prior To field is a request to the peer to use RETIRE_CONNECTION_ID frames to retire CIDs issued by the first party. This means that you can not replace the Retire Prior To field with RETIRE_CONNECTION_ID frames as you suggest, since they work in \"different directions\".\r\n\r\nhttps://www.rfc-editor.org/rfc/rfc9000.html#section-5.1.2-5",
+          "createdAt": "2023-02-20T10:48:16Z",
+          "updatedAt": "2023-02-20T10:48:16Z"
+        },
+        {
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Yes, there is no direct relation between the ordering in which you receive the CIDs and the order of removing them in a multipath context. I'm also not sure that an endhost is required to use available DCIDs \"in-sequence\" (i.e., it may use the CID with seq 2 before using the CID with seq 1).\r\n\r\nBasically, let's consider the following example. Assume a two path scenario where the client uses DCID seq 0 on a path A and DCID seq 2 on a path B. At some point (e.g., the server might notice a NAT rebinding on path B), the server would like the client to retire the DCID with seq 2. The only way the server could force this behaviour is to send NEW_CONNECTION_ID frames with Retire Prior To set to 3, which would force the client to send RETIRE_CID frames. However, doing so would also force the client to retire DCID seq 0, which might not be required/needed/wanted.\r\n\r\nFWIW, [one of the previous multipath proposals](https://datatracker.ietf.org/doc/draft-deconinck-quic-multipath/07/) proposed to let the CID issuer split the CIDs into \"uniflow spaces\", i.e., pre-assign CIDs to specific paths. Such a design enables retiring a specific CID using the Retire Prior To without affecting the other paths, as the CID seq is path-specific. However, such a solution adds more complexity than the current draft, which is likely not desirable.\r\n\r\nIn the end, I'm not sure with the current proposal the aforementioned issue is a big one, but it would indeed deserve some documentation/discussion in the draft.",
+          "createdAt": "2023-02-20T11:29:16Z",
+          "updatedAt": "2023-02-20T11:29:16Z"
         }
       ]
     },
@@ -3683,11 +3697,16 @@
       "state": "OPEN",
       "author": "mirjak",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
-      "labels": [],
+      "assignees": [
+        "qdeconinck"
+      ],
+      "labels": [
+        "has PR",
+        "editorial"
+      ],
       "body": "This draft only enables clients to open a new path, so the most common scenario is that the client has another interface and opens a new path from a new IP address. However, if the client knows another IP that the server is listing on to accept new paths for an existing quic connection (e.g. provided on the higher layer or out of band), that can be used as well. It would be useful to discussion this case more in the draft to ensure that it is clear that this case is supported.",
       "createdAt": "2023-01-24T17:01:16Z",
-      "updatedAt": "2023-02-18T03:42:19Z",
+      "updatedAt": "2023-02-20T10:03:54Z",
       "closedAt": null,
       "comments": [
         {
@@ -14266,6 +14285,32 @@
           ]
         }
       ]
+    },
+    {
+      "number": 168,
+      "id": "PR_kwDOGNtpaM5KU-iM",
+      "title": "Clarify supported scenarios",
+      "url": "https://github.com/quicwg/multipath/pull/168",
+      "state": "OPEN",
+      "author": "qdeconinck",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Fix #159.",
+      "createdAt": "2023-02-20T10:02:44Z",
+      "updatedAt": "2023-02-20T10:03:36Z",
+      "baseRepository": "quicwg/multipath",
+      "baseRefName": "main",
+      "baseRefOid": "9f1d4e26e1df03c0af74e8fdc1978cb6ffb25f3e",
+      "headRepository": "quicwg/multipath",
+      "headRefName": "ip-addresses",
+      "headRefOid": "c8fb94520569292e0e6be171442a8bb938bbcc01",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
