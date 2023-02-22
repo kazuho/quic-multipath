@@ -2085,9 +2085,14 @@ Client                                                      Server
         <h3 id="name-congestion-control">
 <a href="#section-7.1" class="section-number selfRef">7.1. </a><a href="#name-congestion-control" class="section-name selfRef">Congestion Control</a>
         </h3>
-<p id="section-7.1-1">Senders MUST manage per-path congestion status, and MUST NOT send more
-data on a given path than congestion control on that path allows.
-This is already a requirement of <span>[<a href="#QUIC-TRANSPORT" class="cite xref">QUIC-TRANSPORT</a>]</span>.<a href="#section-7.1-1" class="pilcrow">¶</a></p>
+<p id="section-7.1-1">When the QUIC multipath extension is used, senders manage per-path
+congestion status as required in <span><a href="https://rfc-editor.org/rfc/rfc9000#section-9.4" class="relref">Section 9.4</a> of [<a href="#QUIC-TRANSPORT" class="cite xref">QUIC-TRANSPORT</a>]</span>.
+However, in <span>[<a href="#QUIC-TRANSPORT" class="cite xref">QUIC-TRANSPORT</a>]</span> only one active path is assumed and as such
+the requirement is to reset the congestion control status on path migration.
+With the multipath extension, multiple paths can be used simultaneously,
+therefore separate congestion control state is maintained for each path.
+This means a sender is not allowed to send more data on a given path
+than congestion control for that path indicates.<a href="#section-7.1-1" class="pilcrow">¶</a></p>
 <p id="section-7.1-2">When a Multipath QUIC connection uses two or more paths, there is no
 guarantee that these paths are fully disjoint. When two (or more paths)
 share the same bottleneck, using a standard congestion control scheme
