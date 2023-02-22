@@ -5,7 +5,7 @@
 QUIC Working Group                                           Y. Liu, Ed.
 Internet-Draft                                                     Y. Ma
 Intended status: Standards Track                            Alibaba Inc.
-Expires: 11 August 2023                               Q. De Coninck, Ed.
+Expires: 26 August 2023                               Q. De Coninck, Ed.
                                                                UCLouvain
                                                           O. Bonaventure
                                                   UCLouvain and Tessares
@@ -13,7 +13,7 @@ Expires: 11 August 2023                               Q. De Coninck, Ed.
                                                     Private Octopus Inc.
                                                       M. Kuehlewind, Ed.
                                                                 Ericsson
-                                                         7 February 2023
+                                                        22 February 2023
 
 
                       Multipath Extension for QUIC
@@ -51,7 +51,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 11 August 2023.
+   This Internet-Draft will expire on 26 August 2023.
 
 Copyright Notice
 
@@ -797,20 +797,20 @@ Table of Contents
    use DCID S3, which has a sequence number of 3.  Note that the paths
    use different packet number spaces.  In this case, the client is
    going to close the first path.  It identifies the path by the
-   sequence number of the received packet's DCID over that path, hence
-   using the path_id 1.  Optionally, the server confirms the path
-   closure by sending an PATH_ABANDON frame using the sequence number of
-   the received packet's DCID over that path as path identifier, which
-   corresponds to the path_id 2.  Both the client and the server can
-   close the path after receiving the RETIRE_CONNECTION_ID frame for
+   sequence number of the DCID it uses for sending packets over that
+   path, hence using the path_id 2.  Optionally, the server confirms the
+   path closure by sending an PATH_ABANDON frame using the sequence
+   number of the DCID it uses to send over that path as path identifier,
+   which corresponds to the path_id 1.  Both the client and the server
+   can close the path after receiving the RETIRE_CONNECTION_ID frame for
    that path.
 
    Client                                                      Server
 
    (client tells server to abandon a path)
-   1-RTT[X]: DCID=S2 PATH_ABANDON[path_id=1]->
+   1-RTT[X]: DCID=S2 PATH_ABANDON[path_id=2]->
                               (server tells client to abandon a path)
-                         <-1-RTT[Y]: DCID=C1 PATH_ABANDON[path_id=2],
+                         <-1-RTT[Y]: DCID=C1 PATH_ABANDON[path_id=1],
                                                   ACK_MP[Seq=2, PN=X]
    (client retires the corresponding CID)
    1-RTT[U]: DCID=S3 RETIRE_CONNECTION_ID[2], ACK_MP[Seq=1, PN=Y] ->
