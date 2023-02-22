@@ -1381,14 +1381,30 @@ Some deployments of QUIC use zero-length connection IDs.
 However, when a node selects to use zero-length connection IDs, it is not
 possible to use different connection IDs for distinguishing packets
 sent to that node over different paths.<a href="#section-1-8" class="pilcrow">¶</a></p>
-<p id="section-1-9">This proposal does not cover address discovery and management. Addresses
+<p id="section-1-9">Each endhost may use several IP addresses to serve the connection. In
+particular, the multipath extension supports the following scenarios.<a href="#section-1-9" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1-10.1">The client uses multiple IP addresses and the server listens on only
+one.<a href="#section-1-10.1" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-1-10.2">The client uses only one IP address and the server listens on
+several ones.<a href="#section-1-10.2" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-1-10.3">The client uses multiple IP addresses and the server listens on
+several ones.<a href="#section-1-10.3" class="pilcrow">¶</a>
+</li>
+      </ul>
+<p id="section-1-11">This proposal does not cover address discovery and management. Addresses
 and the actual decision process to setup or tear down paths are assumed
 to be handled by the application that is using the QUIC multipath
-extension. Further, this proposal only specifies a simple basic packet
+extension. This is sufficient to address the first aforementioned
+scenario. However, this document does not prevent future extensions from
+defining mechanisms to address the remaining scenarios.
+Further, this proposal only specifies a simple basic packet
 scheduling algorithm, in order to provide some basic implementation
 guidance. However, more advanced algorithms as well as potential
 extensions to enhance signaling of the current path state are expected
-as future work.<a href="#section-1-9" class="pilcrow">¶</a></p>
+as future work.<a href="#section-1-11" class="pilcrow">¶</a></p>
 <div id="definition">
 <section id="section-1.1">
         <h3 id="name-conventions-and-definitions">
