@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2023-02-23T00:49:16.849504+00:00",
+  "timestamp": "2023-02-26T00:56:38.383891+00:00",
   "repo": "quicwg/multipath",
   "labels": [
     {
@@ -3774,7 +3774,7 @@
       ],
       "body": "RFC9000 allows endpoints to change the CID any time on a path. So it's not automatically a new path if a new CID is seen. This should be noted explicitly in the draft.\r\n\r\nFurther, also migration can happened without endpoint control (NAT rebinding). In this case the server will see a new 4-tuple but no CID change. In line with RFC9000 the server should start path validation and then the client should use a new CID. In case of multipath support we need to clarify if and when this is treated as a new path. If seen as a new path, we would probably need to close the old one (which however is not functional anymore). However, if e.g. only the port number changes, RFC9000 also would also to not reset the congestion control. In this case it would make sense to not treat it as a new path.",
       "createdAt": "2023-01-24T17:07:23Z",
-      "updatedAt": "2023-02-21T15:43:58Z",
+      "updatedAt": "2023-02-24T08:01:39Z",
       "closedAt": null,
       "comments": [
         {
@@ -3797,6 +3797,13 @@
           "body": "I created PR #172 that states that any path validation creates a new path (even if only the port changes). I believe this is more clear and avoids inconsistencies on both sides. However, we might discuss this case a bit more.",
           "createdAt": "2023-02-21T15:43:58Z",
           "updatedAt": "2023-02-21T15:43:58Z"
+        },
+        {
+          "author": "yfmascgy",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "> @yfmascgy, I think your decision tree above is too brittle. In particular, if an implementation has a time-based CID change policy, it's very easy that both the CID and the NAT binding change at the same time after an idle period.\r\n>  \r\nThe current draft manages the path idle issues with \"Sending periodic PING frames also helps prevent middlebox timeout.\" Sending periodic PINGs to keep a path alive should greatly reduce the chance of such a NAT rebinding. So I am wondering is it a corner case? and is it worth adding new frames to address it?\r\n\r\n",
+          "createdAt": "2023-02-24T08:01:39Z",
+          "updatedAt": "2023-02-24T08:01:39Z"
         }
       ]
     },
@@ -3954,6 +3961,54 @@
       "body": "Should we maybe call these states rather abandoning/abandoned? (see figure in section 4.4.)?",
       "createdAt": "2023-02-21T15:22:09Z",
       "updatedAt": "2023-02-21T15:34:30Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 179,
+      "id": "I_kwDOGNtpaM5fKl2a",
+      "title": "Proposal: Explicit path identification",
+      "url": "https://github.com/quicwg/multipath/issues/179",
+      "state": "OPEN",
+      "author": "qdeconinck",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "I think given the dynamic nature of the CID usage on paths that leads to some existing design issues(see #137, #158), it is worth having some stable path identification (to address, e.g., #169).\r\n\r\n# What does not change\r\n\r\nI think we now agree that a Multipath QUIC connection uses different Connection IDs on different paths, and each Connection ID has its own packet number space. Such a design enables end-hosts to easily receive packets and decrypt them without assuming anything about the network path (relying directly on the perceived 4-tuple makes the approach fragile). Note that we keep the ACK_MP as it (i.e., we acknowledge packet numbers that used a specific DCID).\r\n\r\n# Identifying network paths (until now)\r\n\r\nSo far, end hosts directly maps the (Destination) Connection ID sequence number as the path identifier of the network path. This path identifier is then used in the path-specific frames (PATH_ABANDON, PATH_STATUS,\u2026). Such an approach has the advantage that we do not have to define additional signalling to identify a network path, and it is relatively easy to track that. However, this means that if one endhost changes the DCID it uses over a given path, this means its identifier changes. Having such dynamic changing identifiers for a stable path causes design issues when using an identifier no more valid in the path-specific frames.\r\n\r\n# Proposal: explicit path identification advertisement during path validation\r\n\r\nThe path validation process establish the identification of a path through the advertisement of the \u201cEntry Point ID\u201d (EPID) used by the packet sender. Each path is identified by a tuple (local EPID, peer EPID). This identification is then used in the path-specific frames to identify the concerned path. Note that each endhost uses EPID 0 on the initial path.\r\n\r\nThis implies that we need an augmented version of the PATH_CHALLENGE/PATH_RESPONSE frames (let\u2019s say PATH_CHALLENGE_MP/PATH_REPSONSE_MP) that include the EPID that the sender used to send the frame.\r\n\r\n## Example\r\n\r\nLet\u2019s consider this initial situation.\r\n\r\n```\r\n  DCID 0 EPID 0                   DCID 0 EPID 0\r\n   +------------------------------------+\r\n   |                                    |\r\nClient                               Server\r\n```\r\n\r\nIn this initial state, each endhost has one path:\r\n\r\nClient\r\n- (EPID 0, EPID 0) using SCID seq 0 and DCID seq 0\r\n\r\nFrom the server perspective, we have\r\n- (EPID 0, EPID 0) using SCID seq 0 and DCID seq 0\r\n\r\nNow the client wants to create a new path on a new local address, but still on the same server address (same IP and port at server side). When the server just processed the PATH_CHALLENGE_MP(data, EPID=1) sent by the client with DCID seq 1, we have this state:\r\n\r\nClient\r\n- (EPID 0, EPID 0) using SCID seq 0 and DCID seq 0\r\n- (EPID 1, ???) using DCID seq 1\r\n\r\nServer\r\n- (EPID 0, EPID 0) using SCID seq 0 and DCID seq 0\r\n- (EPID 0, EPID 1) using SCID seq 1\r\n\r\nNote that the server can figure out at packet reception on which local address it saw, and thus map the corresponding local EPID to the new seen path. The server can then replies with a PATH_RESPONSE_MP(data, EPID=0) (and also initiates a PATH_CHALLENGE_MP as well). Assume here it uses the DCID with seq 2. Once the PATH_RESPONSE_MP is received by the client, we have this state.\r\n\r\nClient\r\n- (EPID 0, EPID 0) using SCID seq 0 and DCID seq 0\r\n- (EPID 1, EPID 0) using DCID seq 1 and SCID seq 2\r\n\r\nServer\r\n- (EPID 0, EPID 0) using SCID seq 0 and DCID seq 0\r\n- (EPID 0, EPID 1) using SCID seq 1 and DCID seq 2\r\n\r\nNow the client can refer to the lower path in PATH_STATUS/PATH_ABANDON frame using (1, 0), and the server could use (1, 0). Note that it makes also possible to extend these frames to the set of paths sharing a given EPID. This tuple is stable as long as end hosts do not change the EPID they use when performing further path validations.\r\n\r\n```\r\n  DCID 0 EPID 0                   DCID 0 EPID 0\r\n   +------------------------------------+\r\n   |                                    |\r\nClient                               Server\r\n   |                                    |\r\n   +------------------------------------+\r\n  DCID 1 EPID 1                   DCID 2 EPID 0\r\n```\r\n\r\nConsider now a specific edge case, that is also hard to handle with the current (CID identification) design: the client decides to change the DCID it uses (now seq 2) on its path (EPID 1, EPID 0), but the very first packet sent experiences a NAT rebinding, making the server see a new 4-tuple. The end hosts\u2019 states just after the server received that packet is\r\n\r\nClient:\r\n- (EPID 0, EPID 0) using SCID seq 0 and DCID seq 0\r\n- (EPID 1, EPID 0) using SCID seq 2 and DCID seq 2\r\n\r\nServer:\r\n- (EPID 0, EPID 0) using SCID seq 0 and DCID seq 0\r\n- (EPID 0, EPID 1) using SCID seq 1 and DCID seq 2\r\n- (EPID 0, EPID ???) using SCID seq 2\r\n\r\nTo address this new unknown path, the server will initiate path validation over that new path using a new DCID (let\u2019s say with seq 3), so it sends a MP_PATH_CHALLENGE(EPID=0) on the lower path. Once the packet reaches and after its processing, we have\r\n\r\nClient:\r\n- (EPID 0, EPID 0) using SCID seq 0 and DCID seq 0\r\n- (EPID 1, EPID 0) using SCID seq 3 and DCID seq 2\r\n\r\nServer:\r\n- (EPID 0, EPID 0) using SCID seq 0 and DCID seq 0\r\n- (EPID 0, EPID 1) using SCID seq 1 and DCID seq 2\r\n- (EPID 0, EPID ???) using SCID seq 2 and DCID seq 3\r\n\r\n\r\nFinally, the client replies with a MP_PATH_RESPONSE on its perceived EPID (hence EPID 1) and the response can reach the server, which can then figure out that the path is actually the same as the previous one (it experienced involuntary 4-tuple change, this is not a new path). The final state is hence\r\n\r\nClient:\r\n- (EPID 0, EPID 0) using SCID seq 0 and DCID seq 0\r\n- (EPID 1, EPID 0) using SCID seq 3 and DCID seq 2\r\n\r\nServer:\r\n- (EPID 0, EPID 0) using SCID seq 0 and DCID seq 0\r\n- (EPID 0, EPID 1) using SCID seq 2 and DCID seq 3\r\n\r\n\r\n## Additional remarks\r\n\r\nIntroducing such additional identifiers may require additional care to cope with EPID that change over a same address or to avoid a same EPID over multiple 4-tuples. I think we can require that new EPID values cannot decrease (monotonically increasing) and observing a same EPID coming from different addresses probably indicates that something is wrong there.\r\n\r\nWe can also extend the required state of a path to be \"Active\", i.e., we need to have both local and peer EPID of a path before considering it as active.\r\n\r\nHaving two endpoint-specific values instead of a single shared one (as suggested by #170) may be desirable to support the edge case mentioned above.",
+      "createdAt": "2023-02-23T10:40:22Z",
+      "updatedAt": "2023-02-23T10:40:22Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 180,
+      "id": "I_kwDOGNtpaM5fQ6vX",
+      "title": "Proposal: PATH_SETUP frame",
+      "url": "https://github.com/quicwg/multipath/issues/180",
+      "state": "OPEN",
+      "author": "michael-eriksson",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "# Introduction\r\n\r\nThe setup of a new path should be explicit with a separate frame type.\r\n\r\n# Design\r\n\r\nA new frame type, `PATH_SETUP` is introduced and used to set up new paths. The frame is sent by the initiating endpoint and includes relevant information (see below). When received by the peer, the peer responds with a `PATH_SETUP` frame in the opposite direction with reciprocal information (an alternative is to have a separate frame type for the path setup response).\r\n\r\nIf there is a worry that the protocol specifications will run out of single-byte (6-bit) frame types, the new frame type could be given a type number in the two-byte (14-bit) range since it will be sent very infrequently.\r\n\r\n# Frame content\r\n\r\n## Path identifier\r\n\r\nThere are good reasons for a stable path identifier (see #179). Having the same path identifier in both directions simplify both the implementations and things like correlating traces taken at the two endpoints (#170).\r\n\r\nThe unique identifier for the new path is selected by the endpoint that initiates the new path. To simplify path initiation also from the server, clients use even path identifiers and servers use odd path identifiers when they initiate new paths. Path identifiers are never reused.\r\n\r\n## Path status\r\n\r\nThe `PATH_STATUS` frame is used to set the status of an existing path (`available` or `standby`). The status of a new path should be signaled directly at path setup, otherwise the peer might start to use a new path that is intended to be `standby` before it gets the `PATH_STATUS` frame.\r\n\r\n## Path parameters\r\n\r\nSome parameters of a new path can be different from what was negotiated for the original path at connection setup. They are signaled in the `PATH_SETUP` frame.\r\n\r\nExamples of per-path parameters: `max_udp_payload_size`, `max_idle_timeout`, `max_ack_delay`.\r\n",
+      "createdAt": "2023-02-24T09:40:40Z",
+      "updatedAt": "2023-02-24T09:40:40Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 181,
+      "id": "I_kwDOGNtpaM5fRCUA",
+      "title": "Regular ACK frames when multipath has been negotiated",
+      "url": "https://github.com/quicwg/multipath/issues/181",
+      "state": "OPEN",
+      "author": "michael-eriksson",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "# Introduction\r\n\r\nIt should be allowed to send regular ACK frames also after multipath has been negotiated.\r\n\r\n# Reasoning\r\n\r\nSending acknowledgments over other paths than where the packet was received is complex, which is recognised in the Packet Scheduling section of the draft. A straight-forward implementation may therefore never send cross-path acknowledgments. Allowing it to use regular ACK frames would reduce the special-case code for multipath mode and also save at least one byte on every acknowledgment.\r\n\r\nThe specification should be updated to (explicitly) say that an endpoint MAY send regular ACK frames also after multipath has been negotiated.",
+      "createdAt": "2023-02-24T09:59:18Z",
+      "updatedAt": "2023-02-24T09:59:18Z",
       "closedAt": null,
       "comments": []
     }
@@ -14804,7 +14859,7 @@
       "labels": [],
       "body": "fixes #160\r\n\r\nAs I added this text into the implementation consideration section, I on purpose did not use normative language. However, we might want to double check that the normative language we used elsewhere in the document is covering this appropriately.",
       "createdAt": "2023-02-21T14:46:54Z",
-      "updatedAt": "2023-02-21T14:47:29Z",
+      "updatedAt": "2023-02-24T07:33:07Z",
       "baseRepository": "quicwg/multipath",
       "baseRefName": "main",
       "baseRefOid": "9f1d4e26e1df03c0af74e8fdc1978cb6ffb25f3e",
@@ -14830,7 +14885,7 @@
       "labels": [],
       "body": "The current text says that one has to wait for a the retire frame or 3 PTOs. However (as also indicated in the states figure) this should be at least 3 PTOs. This PR fixes this inconsistency. Further is add a reference to the definition to PTO and replaces RTO with PTO where the wrong term is used. I believe all these fixes address straightforward mistakes, however, if discussion is needed, we can of course also open an issue.",
       "createdAt": "2023-02-21T15:03:53Z",
-      "updatedAt": "2023-02-21T19:27:06Z",
+      "updatedAt": "2023-02-24T07:26:19Z",
       "baseRepository": "quicwg/multipath",
       "baseRefName": "main",
       "baseRefOid": "9f1d4e26e1df03c0af74e8fdc1978cb6ffb25f3e",
@@ -14882,6 +14937,19 @@
               "updatedAt": "2023-02-21T19:26:58Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5OPYWf",
+          "commit": {
+            "abbreviatedOid": "483499a"
+          },
+          "author": "yfmascgy",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "Looks good to me.",
+          "createdAt": "2023-02-24T07:26:19Z",
+          "updatedAt": "2023-02-24T07:26:19Z",
+          "comments": []
         }
       ]
     },
