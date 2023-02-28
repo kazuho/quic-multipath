@@ -1057,7 +1057,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Liu, et al.</td>
-<td class="center">Expires 25 August 2023</td>
+<td class="center">Expires 1 September 2023</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1070,12 +1070,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-ietf-quic-multipath-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2023-02-21" class="published">21 February 2023</time>
+<time datetime="2023-02-28" class="published">28 February 2023</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2023-08-25">25 August 2023</time></dd>
+<dd class="expires"><time datetime="2023-09-01">1 September 2023</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1144,7 +1144,7 @@ enable the simultaneous usage of multiple paths for a single connection.<a href=
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 25 August 2023.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 1 September 2023.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1653,8 +1653,8 @@ frame contains the Path Identifier and therefore can be sent on any path.
 Respectively, if the to-be-closed path is assumed to be not working anymore,
 the endpoint might consider to send the PATH_ABANDON frame on another path.
 If the expiration of the PTO causes a retransmission of the PATH_ABANDON frame,
-this might be an inidcation that the path is not usable anymore and the
-endpoint respectively might consider to retransmit on another path.<a href="#section-4.3.1-1" class="pilcrow">¶</a></p>
+this might be an indication that the sending path is not usable anymore and the
+endpoint might consider to retransmit the frame on another path.<a href="#section-4.3.1-1" class="pilcrow">¶</a></p>
 <p id="section-4.3.1-2">Once a path is
 marked as "abandoned", it means that the resources related to the path,
 such as the used connection IDs, can be released.
