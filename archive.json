@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2023-02-28T00:51:55.757751+00:00",
+  "timestamp": "2023-03-02T00:55:30.572962+00:00",
   "repo": "quicwg/multipath",
   "labels": [
     {
@@ -3887,7 +3887,7 @@
       ],
       "body": "Currently it seems that the assumption is that the Path ID changes if the CID changes, however, this makes handling of MP frames that contain the path ID more complicated because you have to remember the old path ID to process these frames even when the CID is retired. Is there any good reason why we don't keep the Path ID constant over the life time of a path?",
       "createdAt": "2023-02-21T13:11:28Z",
-      "updatedAt": "2023-02-27T15:53:07Z",
+      "updatedAt": "2023-03-01T13:40:14Z",
       "closedAt": null,
       "comments": [
         {
@@ -3938,6 +3938,125 @@
           "body": "Please note that PR #172 is related here. In this PR I propose that a new 4-tuple is always treated as a new path and therefore always triggers path validation which then ensures to create a new path on both sides. I thought a while about this scenario when working on this PR and believe that's the easiest, non ambiguous solution which I think is inline with the multipath idea.\r\n\r\nFurther, I think that en-/decryption and the path ID do not need to be entangled. Of course we need to use the CID to decrypt the packet, however, I don't think that changing the CID (without changes of the 4-tuple) creates a new packet number space. This is not the case in RFC9000 and should not be the case here.",
           "createdAt": "2023-02-27T15:53:07Z",
           "updatedAt": "2023-02-27T15:53:07Z"
+        },
+        {
+          "author": "yfmascgy",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "> Please note that PR #172 is related here. In this PR I propose that a new 4-tuple is always treated as a new path and therefore always triggers path validation which then ensures to create a new path on both sides. I thought a while about this scenario when working on this PR and believe that's the easiest, non ambiguous solution which I think is inline with the multipath idea.\r\n> \r\nI actually agree with this idea. It is simple and non-ambiguous. Also note that NAT rebinding is a low possibility event. I think the cost for treating a new 4-tuple as a new path is negligible.\r\n\r\n",
+          "createdAt": "2023-02-28T06:44:41Z",
+          "updatedAt": "2023-02-28T06:44:41Z"
+        },
+        {
+          "author": "yfmascgy",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "> @yfmascgy As long as the 4-tuple does not change, there is no \"path change\" from the QUIC viewpoint. Having \"backbone router path migration\" will be transparent to the endmost (although the path characteristic conditions such as the latency and bandwidth may change). The EntryPoint ID proposal is mainly to keep stable path identification in PATH_ABANDON/PATH_STATUS frames when 1) CIDs change and the sender's perceived 4-tuple is stable but the receiver's perceived 4-tuple is not, and 2) when there is no more usable CID over the (network) path to reference.\r\n\r\nIt is not necessarily true that the router path migration is always transparent. In the case when a wifi router switches between a terrestrial ISP and a satellite backbone, the outbound packet may have different source IP addresses since the satellite network and the terrestrial network are operated by different ISPs. In this case, the path switching will cause 4-tuple to change.\r\n\r\n",
+          "createdAt": "2023-02-28T06:52:45Z",
+          "updatedAt": "2023-02-28T06:52:45Z"
+        },
+        {
+          "author": "huitema",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "The difference between \"new path\" and \"rebinding\" is probably less than it sounds. In the behavior suggested by RFC 9000, arrival of packets with the same CID and a new 4-tuple triggers both validation of the new path using Path Challenge, and verification that the old path is actually gone by a parallel Path Challenge on the old path. The verification is there to deal with a potential attack in which an on path attacker (e.g., somebody on the same Wi-Fi network) can capture a 1RTT packet sent by the client, and then resent it from a spoofed IP address.\r\n\r\nI am a bit concerned that \"treating NAT rebinding as a new path\" will keep the Path Challenge on the new path, but not the verification attempt of the old path, and thus expose us to the attack that the verification is meant to mitigate.",
+          "createdAt": "2023-02-28T07:07:43Z",
+          "updatedAt": "2023-02-28T07:07:43Z"
+        },
+        {
+          "author": "huitema",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "@yfmascgy when you say \"a wifi router switches between a terrestrial ISP and a satellite backbone\" is that you want the concept of path in QUIC to follow the topology changes in the network. But we should recognize that this will not always be possible. For example, routing changes can always cause a single 4-tuple to be suddenly routed in a very different way.",
+          "createdAt": "2023-02-28T07:11:42Z",
+          "updatedAt": "2023-02-28T07:11:42Z"
+        },
+        {
+          "author": "yfmascgy",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "> @yfmascgy when you say \"a wifi router switches between a terrestrial ISP and a satellite backbone\" is that you want the concept of path in QUIC to follow the topology changes in the network. But we should recognize that this will not always be possible. For example, routing changes can always cause a single 4-tuple to be suddenly routed in a very different way.\r\n\r\nI think if the 4-tuple does not change, we do not pursue the goal of following the topology change as it is basically not possible. However, my point is when there is a topology change and a 4-tuple change (now we have a detectable signal), we probably do not want to treat it as a NAT rebinding. As we are actually on a different path, retaining the congestion control state and round-trip estimate does not seem to be right. A more reasonable action is to treat it as a new path and reset the congestion controller, right?",
+          "createdAt": "2023-02-28T07:28:45Z",
+          "updatedAt": "2023-02-28T07:28:45Z"
+        },
+        {
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "> So the scenario that you worry about is \"what if the client sleeps for a while, then decides to switch the connection ID before sending new packets\". This is actually a recommended behavior, for privacy reasons, so we have better get it right.\r\n\r\nExactly.\r\n\r\n> I think the simplest solution is for the client to somehow tell the server what it is doing. \"These packets carry CID sequence number 7. For me, this is the same path as when previously using CID sequence number 4.\" My gut feeling is that this can be achieved by sending an \"Abandon_Path(id=4, errorCode=CidRenewal)\" when starting sending with CID 7. Specify something like that in the spec, document the error code, etc.\r\n\r\nI think the proposed approach here could keep changes minimal, although this is not yet perfect. If the client sends two packets with the new CID, but the first one containing such information is lost (but not the second one, which experiences NAT rebinding), then we still face the issue. Of course, we will eventually recover the situation, but there will be a transient state here.\r\n\r\n> Also note that NAT rebinding is a low possibility event.\r\n\r\nMaybe, but I'm not convinced we should take this assumption as granted.\r\n\r\nMore generally, I start thinking about possible security issues we may encounter with this, where the client may frequently rotate the DCID it uses over a path for legitimate purposes, but an on-path attacker may tweak the 4-tuple, hoping it will make it create a lot of (invalid) paths' states at server side. Not sure this will be a strong issue, but we will need to document that at some point.\r\n\r\n> I think if the 4-tuple does not change, we do not pursue the goal of following the topology change as it is basically not possible. However, my point is when there is a topology change and a 4-tuple change (now we have a detectable signal), we probably do not want to treat it as a NAT rebinding. As we are actually on a different path, retaining the congestion control state and round-trip estimate does not seem to be right. A more reasonable action is to treat it as a new path and reset the congestion controller, right?\r\n\r\nI think in case we notice a path \"migrated\" (same CID, different 4-tuple), we can apply the \"RFC9000 connection migration\" feature on a per-path level. In such case, we can follow Section 9.4 of RFC9000, stating that congestion control/RTT must be reset, unless it experiences a port-only change (reset is not mandatory in such cases).\r\n",
+          "createdAt": "2023-02-28T10:13:37Z",
+          "updatedAt": "2023-02-28T10:13:37Z"
+        },
+        {
+          "author": "yfmascgy",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Let's take a step back. Using the current path identifier mechanism, we are fine if (1) CID changes but tuple does not change  and (2) tuple changes but CID does not change. The only difficult case is when the client uses a new CID and the tuple changes (NAT rebinding) at the same time. Note that a NAT rebinding is improbable if packets were recently received on the old path (also see section [9.3.3 in RFC9000](https://rfc-editor.org/rfc/rfc9000#section-9.3.3)). A NAT rebinding mostly happens if a path is idle for some time, but that is already managed by the [4.3.4 in the current draft](https://quicwg.org/multipath/draft-ietf-quic-multipath.html#name-idle-timeout):\r\n\r\n\"Hosts SHOULD stop sending traffic on a path if for at least the period of the idle timeout as specified in [Section 10.1.](https://rfc-editor.org/rfc/rfc9000#section-10.1.) of [[QUIC-TRANSPORT](https://quicwg.org/multipath/draft-ietf-quic-multipath.html#QUIC-TRANSPORT)] (a) no non-probing packet was received or (b) no non-probing packet sent over this path was acknowledged, but MAY ignore that rule if it would disqualify all available paths.\"\r\n\r\nIn other word, if a path is idle long enough such that the 4-tuple is changed by NAT, it should have already been closed except there is only one path left. Therefore, the chance that the server sees (1) >=2 active paths and (2) a packet that has a new CID and a new 4-tuple at the same time is low.\r\n\r\nWhen the server sees (1) >=2 active paths and (2)  a packet that has a new CID and a new 4-tuple, the issue is that we don't know which path the packet belongs to. Hence, we just treat it as an attempt for a new path as @mirjak suggested. However, in the current draft, when the client initiates a new path, the packet should contain a PATH_CHALLENGE frame (see [figure 2](https://quicwg.org/multipath/draft-ietf-quic-multipath.html#name-path-establishment)). If the packet does not contain PATH_CHALLENGE, we should just ignore the packet, which eventually leads to path closure as specified by the current draft (see [figure 1](https://quicwg.org/multipath/draft-ietf-quic-multipath.html#fig-path-states)). Note that in doing so, we are also resilient to the attacks mentioned by @qdeconinck that \"the client may frequently rotate the DCID it uses over a path for legitimate purposes, but an on-path attacker may tweak the 4-tuple, hoping it will make it create a lot of (invalid) paths' states at server side\". \r\n\r\nWhen the server sees (1) only 1 active path and (2) a packet of a new CID and a new 4-tuple but that packet does not have PATH_CHALLENGE, it knows which path the packet belongs to, and we just follow what single path QUIC does and the behavior of multipath quic and single path quic converge in this case.\r\n\r\nTherefore, I think the current draft can already address the issue, and we probably just want to stick to what we have with some minor modifications.",
+          "createdAt": "2023-02-28T10:25:47Z",
+          "updatedAt": "2023-02-28T11:00:22Z"
+        },
+        {
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "body": "If the server sees a packet with a new CID and new 4-tuple but without path challenges it should ignore it as it can't associate it with an existing path. If the client switches to a new path (new 4-tuple) it has to use a new CID and send a path challenges frame.\r\n\r\nThe problem I'm trying to address are cases where the CID (and path ID) changes for whatever reason and we received some valid frames with the old path ID that we can't associate to anything anymore and therefore (unnecessarily) need to drop. Yes, this should not happened that often, so dropping is not the worst option, however, I think having a stable path ID would also make the whole approach logically easier, but maybe that's something we need to discuss and agree on.\r\n\r\nNote that if we change the path ID, that automatically means that we have to silently ignore any unknown path ID as we never know for sure if it was an old path ID or really a completely invalid one. Otherwise we could create an error if we receive an invalid path ID. This could help to avoid that the end get out of sync. However, not sure if that is actual a problem that needs solving.\r\n\r\nIn both cases I think we definitely need to clarify some things in the draft and make sure the taken approach is crystal clear to the reader.",
+          "createdAt": "2023-02-28T11:44:11Z",
+          "updatedAt": "2023-02-28T11:44:11Z"
+        },
+        {
+          "author": "huitema",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "When to reset the congestion controller? That's a very generic problem, and the IETF is creating a WG to study this kind of issues. I think we should not try to invent a multipath specific solution, and just stick with whatever RFC 9000 says now, or what new RFCs will say later.",
+          "createdAt": "2023-02-28T15:52:54Z",
+          "updatedAt": "2023-02-28T15:52:54Z"
+        },
+        {
+          "author": "huitema",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "The more I read this discussion, the more I think we should stick to the path handling specification in RFC 9000. Do a [search for NAT](https://github.com/quicwg/base-drafts/issues?page=2&q=is%3Aissue+NAT) in the archive of QUIC GitHub issues, and you find a big list of messages. Lots of history there, with discussion of congestion control, security issues, DOS attacks, etc. Of course, we could have these discussions again in the multipath context, but we would converge much faster if we did not!",
+          "createdAt": "2023-02-28T16:18:38Z",
+          "updatedAt": "2023-02-28T16:18:38Z"
+        },
+        {
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "body": "We should not change the guidance on congestion control in RFC9000. However, otherwise I don't really understand what you mean by \"stick to path handling in RFC9000\". RFC9000 only has one path at a time, however, this is exactly the part that this extension is changing, so I don't see it as a deviation from the migration handling in RFC9000. Again we have to make a decision and define it clear but wouldn't one or the other solution is more inline with RFC9000 or not. ",
+          "createdAt": "2023-02-28T18:00:02Z",
+          "updatedAt": "2023-02-28T18:00:02Z"
+        },
+        {
+          "author": "huitema",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Looking back at Mirja's original question, \"Currently it seems that the assumption is that the Path ID changes if the CID changes, however, this makes handling of MP frames that contain the path ID more complicated because you have to remember the old path ID to process these frames even when the CID is retired. Is there any good reason why we don't keep the Path ID constant over the life time of a path?\" \r\n\r\nI think we should just bite the bullet, and acknowledge that retiring a CID makes it unusable in the future -- MP frames mentioning the corresponding ID will just be silently ignored. Yes, this can cause for example some spurious packet loss detection, but that can be minimized with strict rules about when to retire a CID -- the various RTO guidelines that we discussed in other threads. Better expose the consequence clearly, so nodes that think of retiring a CID think twice.",
+          "createdAt": "2023-02-28T20:00:34Z",
+          "updatedAt": "2023-02-28T20:00:34Z"
+        },
+        {
+          "author": "huitema",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "As for \"same as RFC 9000\", yes we will of course have one difference, since we handle multiple parallel paths. I am really looking at the reactions to NAT rebinding, how we define what is a NAT rebinding and what is not, etc.",
+          "createdAt": "2023-02-28T20:03:20Z",
+          "updatedAt": "2023-02-28T20:03:20Z"
+        },
+        {
+          "author": "yfmascgy",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I think we can use path ID mechanism of the current draft with the addition of the following rules to address the issues discussed in this thread:\r\n\r\n(1) **Addressing the corner case when new CID and NAT rebinding happen at the same time.** When an endpoint receives a packet that has (new CID, new tuple), check if the packet is trying to initialize a new path (i.e., whether it contains a PATH_CHALLENGE). If it has PATH_CHALLENGE, try creating a new path. If it has no PATH_CHALLENGE and we don't know which path the packet is associated with (num. of paths>=2), discard the packet. If there is only one path, we perform path validation as single path QUIC does.\r\n\r\n(2) **Addressing the issue that you cannot send PATH_ABANDON when you don't have CIDs available to use on a path.**\r\n>Also note if you retire an CID (e.g. because it's requested by the peer in the NEW_CONNECTION_ID Frame Retire Prior To field) and you don't have a new CID available anymore (yes, this should usually not happen), you cannot send a PATH_ABANDON frame anymore because you don't have valid Path ID (and we don't have the type field anymore).\" \r\n\r\nWhen an endpoint receives a NEW_CONNECTION_ID frame that has retire_prior_field set **and** it finds that the retire_prior_to field will cause it to have no more CIDs to send packets on a particular path, before sending RETIRE_CONNECTION_ID frame, it first sends PATH_ABANDON frame to signal path closure to the peer.\r\n\r\n",
+          "createdAt": "2023-03-01T06:35:38Z",
+          "updatedAt": "2023-03-01T06:35:38Z"
+        },
+        {
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "@yfmascgy I think I can live with your proposed rules. Adding some text stating that a client SHOULD include a PATH_CHALLENGE frame when it changes the DCID it uses (even if it does not change the 4-tuple used) is reasonable to address the aforementioned corner cases.\r\n\r\nI wonder though if it would make sense to define a small informative frame to indicate to the client that the new DCID seen has been rejected as it cannot map to an existing path, to suggest the client it should retire the CID and retry with a new one while bundling PATH_CHALLENGE, but not a big concern though.",
+          "createdAt": "2023-03-01T09:45:55Z",
+          "updatedAt": "2023-03-01T09:45:55Z"
+        },
+        {
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "body": "So, yes we can make it work with changing the path ID. But I wonder if things would be simpler if we keep it stable. So asking my initial question again: what are the drawbacks when we try to keep it stable?",
+          "createdAt": "2023-03-01T10:33:26Z",
+          "updatedAt": "2023-03-01T10:33:26Z"
+        },
+        {
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I think it would be nice to have stable Path IDs. However, all the challenge resides in how we could define such stable \"path identifiers\", as the sending/receiving paths may use different CIDs over their lifetime and may perceive different 4-tuples.",
+          "createdAt": "2023-03-01T13:40:14Z",
+          "updatedAt": "2023-03-01T13:40:14Z"
         }
       ]
     },
@@ -4079,9 +4198,87 @@
       "labels": [],
       "body": "# Introduction\r\n\r\nIt should be allowed to send regular ACK frames also after multipath has been negotiated.\r\n\r\n# Reasoning\r\n\r\nSending acknowledgments over other paths than where the packet was received is complex, which is recognised in the Packet Scheduling section of the draft. A straight-forward implementation may therefore never send cross-path acknowledgments. Allowing it to use regular ACK frames would reduce the special-case code for multipath mode and also save at least one byte on every acknowledgment.\r\n\r\nThe specification should be updated to (explicitly) say that an endpoint MAY send regular ACK frames also after multipath has been negotiated.",
       "createdAt": "2023-02-24T09:59:18Z",
-      "updatedAt": "2023-02-24T09:59:18Z",
+      "updatedAt": "2023-03-01T20:58:06Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Sending regular ACK frames is still allowed after Multipath has been negotiated, but these refer to the Path ID 0.\r\n\r\nIf I understand well, the proposal is to allow considering the reception of an ACK frame over a given 4-tuple as the acknowledgment of packets sent over that 4-tuple. ACK/ACK_MP frames in multipath acknowledge packets using a specific DCID. The issue here is that there is a one-to-many relation between a 4-tuple and the Path ID (i.e., the sequence number of the DCID used). Relying on the 4-tuple to infer the DCID that may lead to acknowledgment ambiguities here.\r\n\r\nConsider for the example the case where a client decides to rotate the DCID it uses over a given path every 2 packets (we could also consider a timer-based change where the DCID change occurs in the middle of a sending burst). It then sends over that path DCID 1 PN 0, DCID 1 PN 1, DCID 2 PN 0 and DCID 2 PN 1. What should the server sends here? If it relies on the largest DCID sequence number seen, it may send ACK(0-1), but from the client perspective, such indication is unclear (especially if, e.g., one of the packets sent with DCID 1 has been lost).",
+          "createdAt": "2023-02-28T10:31:15Z",
+          "updatedAt": "2023-02-28T10:31:15Z"
+        },
+        {
+          "author": "yfmascgy",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "> # Introduction\r\n> It should be allowed to send regular ACK frames also after multipath has been negotiated.\r\n> \r\n> # Reasoning\r\n> Sending acknowledgments over other paths than where the packet was received is complex, which is recognised in the Packet Scheduling section of the draft. A straight-forward implementation may therefore never send cross-path acknowledgments. Allowing it to use regular ACK frames would reduce the special-case code for multipath mode and also save at least one byte on every acknowledgment.\r\n> \r\n> The specification should be updated to (explicitly) say that an endpoint MAY send regular ACK frames also after multipath has been negotiated.\r\n\r\nThe ACK_MP's path ID is tied to packet number space. Removing it will introduce ambiguity. I also feel the benefit of saving one byte is not very significant.",
+          "createdAt": "2023-02-28T11:07:38Z",
+          "updatedAt": "2023-02-28T11:07:38Z"
+        },
+        {
+          "author": "michael-eriksson",
+          "authorAssociation": "NONE",
+          "body": "@qdeconinck, I don't think that the mechanism for path CID changes has been defined, has it? I, for one, would *really* like to have stable path identifiers (that are identical in both directions).\r\n\r\nI'm not sure I understand what you are suggesting above, please correct me if I'm wrong below.\r\n\r\nIt seems like you suggest that the packet numbers are reset for the path when the destination connection identifier changes, is that correct? That would imply that you would then need a new instance of the loss detection (which is packet number based) when the CID changes, including restarting RTT estimates etc. Maybe even worse, you would have double loss detection instances for the path until all packets sent with the previous CID are acknowledged or declared lost. Is this correct?",
+          "createdAt": "2023-02-28T20:57:10Z",
+          "updatedAt": "2023-02-28T20:57:10Z"
+        },
+        {
+          "author": "michael-eriksson",
+          "authorAssociation": "NONE",
+          "body": "> The ACK_MP's path ID is tied to packet number space. Removing it will introduce ambiguity. I also feel the benefit of saving one byte is not very significant.\r\n\r\nThe implicit path id of the regular ACK frame would be the path id over which is was transmitted. A receiver must anyway always be able to understand on which path a packet arrives, so it can set the Path Identifier field of the ACK_MP frame to the correct value.\r\n\r\nThe main point with this issue is not to save one or a few bytes (but see below). What I am after is to reduce the special case code for multipath compared to regular unipath QUIC when multipath isn't enabled. That leads to simpler and cleaner code, which is easier to test and maintain.\r\n\r\nWhen it comes to saving bytes, that might seem silly in the times of terabit fibers. However, the world isn't that simple...\r\n- ACK-only packets are not congestion controlled, and keeping them small is good for the stability of the Internet.\r\n- Some paths are very asymmetric and can even be ACK limited; smaller ACKs is a good thing here as well.\r\n- My employer, Ericsson, produce cellular infrastructure. The uplink, from the mobile device to the base station, is often a limitation. For media streaming, which is like 70+% of the mobile broadband traffic, almost only ACKs go on the uplink. Saving a completely redundant byte here can actually be relevant, especially if most of the header (including the connection identifier) is compressed away.",
+          "createdAt": "2023-02-28T21:26:21Z",
+          "updatedAt": "2023-02-28T21:26:21Z"
+        },
+        {
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "> @qdeconinck, I don't think that the mechanism for path CID changes has been defined, has it? I, for one, would really like to have stable path identifiers (that are identical in both directions).\r\n\r\nActually, this is somewhat implicitly discussed in [Section 4.3.3](https://quicwg.org/multipath/draft-ietf-quic-multipath.html#section-4.3.3). Over a given path (4-tuple), an endpoint can change the DCID it uses to send packets. The sequence number of the DCID used by the client over a given path may be different from the server one, yes.\r\n\r\n> I'm not sure I understand what you are suggesting above, please correct me if I'm wrong below.\r\n\r\n> It seems like you suggest that the packet numbers are reset for the path when the destination connection identifier changes, is that correct?\r\n\r\nDuring some time, the sender will have two space numbers associated to that path, indeed (the one of the old DCID seq num and the new one). At most, you may need to maintain max_active_cid_limit sending application data spaces. The receiver can also track the 4-tuple on which it observes the CID to bind its ACK_MP there.\r\n\r\n> That would imply that you would then need a new instance of the loss detection (which is packet number based) when the CID changes, including restarting RTT estimates etc. Maybe even worse, you would have double loss detection instances for the path until all packets sent with the previous CID are acknowledged or declared lost. Is this correct?\r\n\r\nI'm not sure the recovery structure needs to be duplicated though. Given you are using the same 4-tuple (just rotating the CID), you can keep the same RTT. You can also update your recovery structure to keep track of the space identifier of the sent packets. Such complexity will be located at the sender-side.",
+          "createdAt": "2023-03-01T09:10:40Z",
+          "updatedAt": "2023-03-01T09:10:40Z"
+        },
+        {
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@qdeconinck I wasn't assuming that you would reset the packet number when only the CID changes; this is not a new path. Why is that needed?\r\n\r\nI guess this is a separate issue we need to discuss and clarify.",
+          "createdAt": "2023-03-01T10:37:35Z",
+          "updatedAt": "2023-03-01T10:37:35Z"
+        },
+        {
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "> @qdeconinck I wasn't assuming that you would reset the packet number when only the CID changes; this is not a new path. Why is that needed?\r\n\r\nBecause the 4-tuple perceived by the receiver may change while the one used by the sender might not. The CID sequence number provides an unambiguous matching to a packet number space for both the sender and the receiver without decrypting the packet.",
+          "createdAt": "2023-03-01T13:52:00Z",
+          "updatedAt": "2023-03-01T13:52:00Z"
+        },
+        {
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Yes and because you use the CID as identifier and not the 4-tuple, there can be no ambiguity and therefore you can simply update your mapping without having to reset.",
+          "createdAt": "2023-03-01T14:01:40Z",
+          "updatedAt": "2023-03-01T14:01:40Z"
+        },
+        {
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "At sender side, yes. But at receiver side, this is trickier, especially if the packet number encoding truncates the actual packet number (which packet number should you expect from a new CID to derive the actual one?).",
+          "createdAt": "2023-03-01T14:07:17Z",
+          "updatedAt": "2023-03-01T14:07:17Z"
+        },
+        {
+          "author": "huitema",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "To understand the relation between CID and number space, consider the case of a path on which 1 + 2^32 have been sent using CID number X. Now, the sender decides to refresh the CID to number Y. What should be the PN for the next packet? If you said \"2+2^32\", you are going to have a bug, because the packet header can use at most 32 bits to encode the packet. The packet will look like:\r\n\r\n| 1rtt (PN length=4) | CID (seq num=Y) | 32 bit PN=0x00000002 | payload... |\r\n|-------------|-------------------------|--------------|----------|\r\n\r\nThe receiver of the packet expands the PN number to 64 bits to get the IV used by AEAD. To do that, it looks at the CID, find the corresponding number space, and infer the upper 32 bits from past numbers. If the CID was X, the past number would be \"1+2^32\", and the PB would expand to \"0x0000000100000002\". But that it is a first use of CID Y, and the receiver has not seen any previous path ID. So it expands the number to \"\"0x0000000000000002\". Both sender and receiver have to use that value, otherwise decryption will fail.\r\n\r\nBottom line: number spaces are really tied to CID numbers.\r\n",
+          "createdAt": "2023-03-01T18:56:46Z",
+          "updatedAt": "2023-03-01T18:57:34Z"
+        },
+        {
+          "author": "michael-eriksson",
+          "authorAssociation": "NONE",
+          "body": "> Bottom line: number spaces are really tied to CID [sequence] numbers.\r\n\r\nThat is not true.\r\n\r\nTo be able to decode an incoming packet, the receiving endpoint must be able to map the CID to the path, and in particular get two pieces of path-specific information:\r\n- The `largest_pn` state variable to be able to decode (i.e., expand) the truncated packet number\r\n- The path identifier to create the nonce for the AEAD decryption.\r\n\r\nThis information can be for instance be stored in a hash map that has the CID as key. The CID sequence number is not relevant, and in particular the path identifier can (and should) be different from the CID sequence number.",
+          "createdAt": "2023-03-01T20:58:06Z",
+          "updatedAt": "2023-03-01T20:58:06Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -14930,13 +15127,13 @@
       "labels": [],
       "body": "fixes #160\r\n\r\nAs I added this text into the implementation consideration section, I on purpose did not use normative language. However, we might want to double check that the normative language we used elsewhere in the document is covering this appropriately.",
       "createdAt": "2023-02-21T14:46:54Z",
-      "updatedAt": "2023-02-27T17:16:50Z",
+      "updatedAt": "2023-03-01T10:57:26Z",
       "baseRepository": "quicwg/multipath",
       "baseRefName": "main",
       "baseRefOid": "9f1d4e26e1df03c0af74e8fdc1978cb6ffb25f3e",
       "headRepository": "quicwg/multipath",
       "headRefName": "mirjak-patch-16",
-      "headRefOid": "6d5168e3a0491d48d15502b12afd6131ca51e982",
+      "headRefOid": "2ee092dffc08be5751c6bde3851a0b1a2c17effd",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -14982,6 +15179,122 @@
               "updatedAt": "2023-02-27T17:16:50Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5OgINu",
+          "commit": {
+            "abbreviatedOid": "6d5168e"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "CHANGES_REQUESTED",
+          "body": "I don't think the added text is right.",
+          "createdAt": "2023-02-28T08:51:00Z",
+          "updatedAt": "2023-02-28T09:20:59Z",
+          "comments": [
+            {
+              "originalPosition": 9,
+              "body": "```suggestion\r\nIn this case the server performs path validation (see {{Section 9 of QUIC-TRANSPORT}})\r\n```",
+              "createdAt": "2023-02-28T08:51:00Z",
+              "updatedAt": "2023-02-28T09:20:59Z"
+            },
+            {
+              "originalPosition": 10,
+              "body": "I'm not sure the client is always expected to change its CID when experiencing NAT rebinding, as by definition it does not observe any 4-tuple change (while the server does, of course). In particular, I'm not sure how the client could even notice that. Relying on the reception of a PATH_CHALLENGE after some time is probably too reactive, as a server may periodically probe its network paths (i.e., receiving a path challenge from the server does not necessarily indicates it saw a NAT rebinding).",
+              "createdAt": "2023-02-28T08:55:18Z",
+              "updatedAt": "2023-02-28T09:20:59Z"
+            },
+            {
+              "originalPosition": 12,
+              "body": "```suggestion\r\nEven is the path validation is caused by a migration event, when\r\n```",
+              "createdAt": "2023-02-28T08:56:02Z",
+              "updatedAt": "2023-02-28T09:20:59Z"
+            },
+            {
+              "originalPosition": 15,
+              "body": "I don't think this is right. The reception of a new PATH_CHALLENGE should not create a new path, especially if the perceived 4-tuple remains the same.",
+              "createdAt": "2023-02-28T08:57:53Z",
+              "updatedAt": "2023-02-28T09:20:59Z"
+            },
+            {
+              "originalPosition": 17,
+              "body": "I definitely agree with the common share view on the number of active paths, but I will relax this that \"within some time (ideally 1 RTT), end hosts should eventually have the same view\".\r\n\r\nDuring a NAT rebinding event, if the CID previously used remains the same, the server can consider this new 4-tuple as the updated 4-tuple of the previously used path. However, if both the 4-tuple and the CID change, the server will interpret this as a brand new path (while the client does not). The server would then maintain a no-more functioning path (the old 4-tuple), which is not desirable.",
+              "createdAt": "2023-02-28T09:09:25Z",
+              "updatedAt": "2023-02-28T09:20:59Z"
+            },
+            {
+              "originalPosition": 34,
+              "body": "Also, I don't think we should consider two different CIDs using the same perceived 4-tuple as two different paths. This should just be considered as a CID rotation over a given path. We could specify at some place that \"the sequence number of the DCID used over a path MUST be greater or equal to the one currently in use\" to avoid flipping the CID on a path.\r\n\r\nAnd as mentioned in a previous comment, I don't think we should consider the reception of a PATH_CHALLENGE as an automatic path creation, as end hosts may probe existing paths. It also raises the concerns of an end hosts sending multiple PATH_CHALLENGEs over a path to cope with possible packet losses (these should not be considered as multiple paths).",
+              "createdAt": "2023-02-28T09:19:54Z",
+              "updatedAt": "2023-02-28T09:20:59Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5OhKWr",
+          "commit": {
+            "abbreviatedOid": "2ee092d"
+          },
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-02-28T11:23:23Z",
+          "updatedAt": "2023-02-28T11:23:23Z",
+          "comments": [
+            {
+              "originalPosition": 10,
+              "body": "My thinking was that if you receive a path challenge from the server, you should treat this as a \"request\" to open a new path and thus use a new CID even if the 4-tuple seem to correspond to an existing path.\r\n\r\nHowever, thinking further I guess you also have to close the existing path at the same time as you should not have two paths with the same 4-tuple. Thus the client MUST send a path abandon frame for the old path.",
+              "createdAt": "2023-02-28T11:23:23Z",
+              "updatedAt": "2023-02-28T11:23:23Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5OhOAb",
+          "commit": {
+            "abbreviatedOid": "2ee092d"
+          },
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-02-28T11:34:08Z",
+          "updatedAt": "2023-02-28T11:35:44Z",
+          "comments": [
+            {
+              "originalPosition": 15,
+              "body": "I think this is something we need to decide.\r\n\r\nThe problem is that the server sees a new 4-tuple but the client not, so we need to make clear if this creates a new path or not in such a way that both ends come to the same conclusion.\r\n\r\nYou could also say it's not a new path if on server side the 4-tuple changes but not the CID and on client side a path challenge (with new CID) is received on an existing 4-tuple. However, you still need to reset congestion control in most cases, so I thought it was easier to just create a new path. ",
+              "createdAt": "2023-02-28T11:34:08Z",
+              "updatedAt": "2023-02-28T11:35:44Z"
+            },
+            {
+              "originalPosition": 17,
+              "body": "If both the 4-tuple and the CID changes, the client should send a path challenge in that packet to explicitly open a new path. Otherwise the server should probably ignore that packet as it can't associate it to an exiting path. Maybe something we should also spell out more clearly.",
+              "createdAt": "2023-02-28T11:35:38Z",
+              "updatedAt": "2023-02-28T11:35:44Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5Op180",
+          "commit": {
+            "abbreviatedOid": "6d5168e"
+          },
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-01T10:57:26Z",
+          "updatedAt": "2023-03-01T10:57:26Z",
+          "comments": [
+            {
+              "originalPosition": 17,
+              "body": "Actually ignoring might not be right to address this change where you restart after an idle period with a new CID and then also the NAT rebinding happens... however, it would be the same procedure as in the case when the CID not changes after a NAT rebinding: the server sends a path challenge frame and that would be the signal for the client to assign a new path and use a new CID + close the old path on the presumedly same 4-tuple from the client's point of view.",
+              "createdAt": "2023-03-01T10:57:26Z",
+              "updatedAt": "2023-03-01T10:57:26Z"
+            }
+          ]
         }
       ]
     },
@@ -14997,7 +15310,7 @@
       "labels": [],
       "body": "The current text says that one has to wait for a the retire frame or 3 PTOs. However (as also indicated in the states figure) this should be at least 3 PTOs. This PR fixes this inconsistency. Further is add a reference to the definition to PTO and replaces RTO with PTO where the wrong term is used. I believe all these fixes address straightforward mistakes, however, if discussion is needed, we can of course also open an issue.",
       "createdAt": "2023-02-21T15:03:53Z",
-      "updatedAt": "2023-02-27T15:54:40Z",
+      "updatedAt": "2023-02-28T11:08:55Z",
       "baseRepository": "quicwg/multipath",
       "baseRefName": "main",
       "baseRefOid": "9f1d4e26e1df03c0af74e8fdc1978cb6ffb25f3e",
@@ -15142,6 +15455,46 @@
               "updatedAt": "2023-02-27T15:54:40Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5OgddA",
+          "commit": {
+            "abbreviatedOid": "483499a"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "CHANGES_REQUESTED",
+          "body": "I think the meaning is right, but I think we can clarify it (suggestion provided).",
+          "createdAt": "2023-02-28T09:40:55Z",
+          "updatedAt": "2023-02-28T09:41:58Z",
+          "comments": [
+            {
+              "originalPosition": 23,
+              "body": "I think we agree on the meaning, but we should indeed improve the presentation. What about replacing the first (very) long sentence by this?\r\n\r\n```\r\nUpon the reception of a PATH_ABANDON, the endpoint SHOULD delay the release\r\nof the associated path resource until either a) the peer has retired the\r\nConnection ID it used on the abandoned path, or b) at least three times the\r\ncurrent Probe Timeout (PTO) interval as defined in {{Section 6.2. of QUIC-RECOVERY}}.\r\n```",
+              "createdAt": "2023-02-28T09:40:56Z",
+              "updatedAt": "2023-02-28T09:41:58Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5OhFAF",
+          "commit": {
+            "abbreviatedOid": "483499a"
+          },
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-02-28T11:08:54Z",
+          "updatedAt": "2023-02-28T11:08:55Z",
+          "comments": [
+            {
+              "originalPosition": 23,
+              "body": "Okay this means we do not agree. I believe you always have to wait at least threes PTOs because of re-ordered packets. I guess if you receive the retired CID frame that means that the peer will not send any new packets but you can only be sure that there is no reordering if you received all packets before the packet with the retired CID frame, however, you don't really know how far back you have to look or there could be gaps introduced by the sender. So checking that is not really practical and always waiting for 3 PTOs is therefore just simpler. Or is there is strong reason why it would be needed to release resources on receipt of the retired CID frame already?\r\n\r\nI note that this discussion is also related to the question if we change the path ID with the CID or not. If we retire the path ID together with the CID, it makes more sense to act on the retired CID frame because in this case even if you receive reordered packets, you would not be able to process them as you don't have a valid path ID.",
+              "createdAt": "2023-02-28T11:08:54Z",
+              "updatedAt": "2023-02-28T11:08:55Z"
+            }
+          ]
         }
       ]
     },
@@ -15157,13 +15510,13 @@
       "labels": [],
       "body": "",
       "createdAt": "2023-02-21T15:15:46Z",
-      "updatedAt": "2023-02-27T10:54:47Z",
+      "updatedAt": "2023-02-28T10:56:20Z",
       "baseRepository": "quicwg/multipath",
       "baseRefName": "main",
       "baseRefOid": "9f1d4e26e1df03c0af74e8fdc1978cb6ffb25f3e",
       "headRepository": "quicwg/multipath",
       "headRefName": "mirjak-patch-18",
-      "headRefOid": "6b7825217d277aa414d7fbacef84d7dc0ad58593",
+      "headRefOid": "00f85de9c4001e6b0005aa279ab6953aa558b7a1",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -15189,6 +15542,26 @@
               "updatedAt": "2023-02-21T15:35:57Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5OgWAi",
+          "commit": {
+            "abbreviatedOid": "6b78252"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "Minor editorial suggestion.",
+          "createdAt": "2023-02-28T09:23:56Z",
+          "updatedAt": "2023-02-28T09:24:24Z",
+          "comments": [
+            {
+              "originalPosition": 11,
+              "body": "```suggestion\r\nthis might be an indication that the sending path is not usable anymore and the\r\nendpoint might consider to retransmit the frame on another path.\r\n```",
+              "createdAt": "2023-02-28T09:23:56Z",
+              "updatedAt": "2023-02-28T09:24:24Z"
+            }
+          ]
         }
       ]
     },
@@ -15204,7 +15577,7 @@
       "labels": [],
       "body": "",
       "createdAt": "2023-02-21T15:26:51Z",
-      "updatedAt": "2023-02-27T10:54:22Z",
+      "updatedAt": "2023-02-28T09:22:33Z",
       "baseRepository": "quicwg/multipath",
       "baseRefName": "main",
       "baseRefOid": "9f1d4e26e1df03c0af74e8fdc1978cb6ffb25f3e",
@@ -15216,7 +15589,21 @@
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGNtpaM5OgVZ_",
+          "commit": {
+            "abbreviatedOid": "d316ff4"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2023-02-28T09:22:33Z",
+          "updatedAt": "2023-02-28T09:22:33Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
