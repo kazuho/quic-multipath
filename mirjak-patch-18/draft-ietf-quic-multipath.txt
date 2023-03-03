@@ -5,7 +5,7 @@
 QUIC Working Group                                           Y. Liu, Ed.
 Internet-Draft                                                     Y. Ma
 Intended status: Standards Track                            Alibaba Inc.
-Expires: 1 September 2023                             Q. De Coninck, Ed.
+Expires: 4 September 2023                             Q. De Coninck, Ed.
                                                                UCLouvain
                                                           O. Bonaventure
                                                   UCLouvain and Tessares
@@ -13,7 +13,7 @@ Expires: 1 September 2023                             Q. De Coninck, Ed.
                                                     Private Octopus Inc.
                                                       M. Kuehlewind, Ed.
                                                                 Ericsson
-                                                        28 February 2023
+                                                            3 March 2023
 
 
                       Multipath Extension for QUIC
@@ -51,7 +51,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 1 September 2023.
+   This Internet-Draft will expire on 4 September 2023.
 
 Copyright Notice
 
@@ -428,12 +428,6 @@ Table of Contents
    by sending PATH_ABANDON frame (see Section 8.1) which abandons the
    path with a corresponding Path Identifier.  The PATH_ABANDON frame
    contains the Path Identifier and therefore can be sent on any path.
-   Respectively, if the to-be-closed path is assumed to be not working
-   anymore, the endpoint might consider to send the PATH_ABANDON frame
-   on another path.  If the expiration of the PTO causes a
-   retransmission of the PATH_ABANDON frame, this might be an indication
-   that the sending path is not usable anymore and the endpoint might
-   consider to retransmit the frame on another path.
 
    Once a path is marked as "abandoned", it means that the resources
    related to the path, such as the used connection IDs, can be
