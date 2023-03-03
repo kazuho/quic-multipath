@@ -5,7 +5,7 @@
 QUIC Working Group                                           Y. Liu, Ed.
 Internet-Draft                                                     Y. Ma
 Intended status: Standards Track                            Alibaba Inc.
-Expires: 1 September 2023                             Q. De Coninck, Ed.
+Expires: 4 September 2023                             Q. De Coninck, Ed.
                                                                UCLouvain
                                                           O. Bonaventure
                                                   UCLouvain and Tessares
@@ -13,7 +13,7 @@ Expires: 1 September 2023                             Q. De Coninck, Ed.
                                                     Private Octopus Inc.
                                                       M. Kuehlewind, Ed.
                                                                 Ericsson
-                                                        28 February 2023
+                                                            3 March 2023
 
 
                       Multipath Extension for QUIC
@@ -51,7 +51,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 1 September 2023.
+   This Internet-Draft will expire on 4 September 2023.
 
 Copyright Notice
 
@@ -142,7 +142,7 @@ Table of Contents
 
    *  If the 4-tuple changes without the use of a new connection ID
       (e.g. due to a NAT rebinding), this is considered as a migration
-      event and not as a new path.
+      event.
 
    The path management specified in Section 9 of [QUIC-TRANSPORT]
    fulfills multiple goals: it directs a peer to switch sending through
