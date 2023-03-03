@@ -5,7 +5,7 @@
 QUIC Working Group                                           Y. Liu, Ed.
 Internet-Draft                                                     Y. Ma
 Intended status: Standards Track                            Alibaba Inc.
-Expires: 26 August 2023                               Q. De Coninck, Ed.
+Expires: 4 September 2023                             Q. De Coninck, Ed.
                                                                UCLouvain
                                                           O. Bonaventure
                                                   UCLouvain and Tessares
@@ -13,7 +13,7 @@ Expires: 26 August 2023                               Q. De Coninck, Ed.
                                                     Private Octopus Inc.
                                                       M. Kuehlewind, Ed.
                                                                 Ericsson
-                                                        22 February 2023
+                                                            3 March 2023
 
 
                       Multipath Extension for QUIC
@@ -51,7 +51,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 26 August 2023.
+   This Internet-Draft will expire on 4 September 2023.
 
 Copyright Notice
 
@@ -403,7 +403,8 @@ Table of Contents
    decide to abandon one of these paths, following for example changes
    in local connectivity or changes in local preferences.  After an
    endpoint abandons a path, the peer will not receive any more non-
-   probing packets on that path.
+   probing packets on that path.  Non-probing packets are defined in
+   Section 9.1 of [QUIC-TRANSPORT].
 
    An endpoint that wants to close a path SHOULD use explicit request to
    terminate the path by sending the PATH_ABANDON frame (see
