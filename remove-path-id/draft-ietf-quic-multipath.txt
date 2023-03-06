@@ -5,7 +5,7 @@
 QUIC Working Group                                           Y. Liu, Ed.
 Internet-Draft                                                     Y. Ma
 Intended status: Standards Track                            Alibaba Inc.
-Expires: 4 September 2023                             Q. De Coninck, Ed.
+Expires: 7 September 2023                             Q. De Coninck, Ed.
                                                                UCLouvain
                                                           O. Bonaventure
                                                   UCLouvain and Tessares
@@ -13,7 +13,7 @@ Expires: 4 September 2023                             Q. De Coninck, Ed.
                                                     Private Octopus Inc.
                                                       M. Kuehlewind, Ed.
                                                                 Ericsson
-                                                            3 March 2023
+                                                            6 March 2023
 
 
                       Multipath Extension for QUIC
@@ -51,7 +51,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 4 September 2023.
+   This Internet-Draft will expire on 7 September 2023.
 
 Copyright Notice
 
@@ -240,12 +240,12 @@ Table of Contents
    Section 4.  In this version of the document, a QUIC server does not
    initiate the creation of a path, but it can validate a new path
    created by a client.  A new path can only be used once it has been
-   validated.  Each endpoint identifies its paths by the sequence number
-   of the Destination Connection ID it uses over them.  Such numerical
-   identifier is notably used when an endpoint sends a PATH_ABANDON
-   frame to request its peer to abandon the path on which the sender
-   uses the Destination Connection ID with the sequence number contained
-   in the PATH_ABANDON frame.
+   validated.  The Destination Connection ID is used to associate a
+   packet to a valid path.  Further, the sequence number of Destination
+   Connection ID is used as numerical identifier in control frames.
+   E.g. an endpoint sends a PATH_ABANDON frame to request its peer to
+   abandon the path on which the sender uses the Destination Connection
+   ID with the sequence number contained in the PATH_ABANDON frame.
 
    In addition to these core features, an application using Multipath
    QUIC will typically need additional algorithms to handle the number
@@ -629,7 +629,7 @@ Table of Contents
    1-RTT packets.  Compared to the QUIC version 1 ACK frame, the ACK_MP
    frame additionally contains the Receiver's Destination Connection ID
    Sequence Number field to distinguish the Connection ID-specific
-   packet number space acknowledged.
+   packet number space.
 
    Acknowledgements of Initial and Handshake packets MUST be carried
    using ACK frames, as specified in [QUIC-TRANSPORT].  The ACK frames,
@@ -641,7 +641,7 @@ Table of Contents
    As soon as the negotiation of multipath support is completed,
    endpoints SHOULD use ACK_MP frames instead of ACK frames to
    acknowledge application data packets, including 0-RTT packets, using
-   the Connection ID with sequence number 0 after the handshake
+   the initial Connection ID with sequence number 0 after the handshake
    concluded.
 
    ACK_MP frame (defined in Section 8.3) SHOULD be sent on the path it
@@ -1013,7 +1013,8 @@ Table of Contents
 
    Sender's Destination Connection ID Sequence Number:  The sequence
       number of the Destination Connection ID used by the sender of this
-      frame to send packets over the path the status update corresponds.
+      frame to send packets over the path the status update corresponds
+      to.
 
    Path Status sequence number:  A variable-length integer specifying
       the sequence number assigned for this PATH_STATUS frame.  The
