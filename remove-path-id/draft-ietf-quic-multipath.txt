@@ -5,7 +5,7 @@
 QUIC Working Group                                           Y. Liu, Ed.
 Internet-Draft                                                     Y. Ma
 Intended status: Standards Track                            Alibaba Inc.
-Expires: 7 September 2023                             Q. De Coninck, Ed.
+Expires: 8 September 2023                             Q. De Coninck, Ed.
                                                                UCLouvain
                                                           O. Bonaventure
                                                   UCLouvain and Tessares
@@ -13,7 +13,7 @@ Expires: 7 September 2023                             Q. De Coninck, Ed.
                                                     Private Octopus Inc.
                                                       M. Kuehlewind, Ed.
                                                                 Ericsson
-                                                            6 March 2023
+                                                            7 March 2023
 
 
                       Multipath Extension for QUIC
@@ -51,7 +51,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 7 September 2023.
+   This Internet-Draft will expire on 8 September 2023.
 
 Copyright Notice
 
@@ -383,11 +383,11 @@ Table of Contents
    *  Mark a path as "standby", i.e., suggest that no traffic should be
       sent on that path if another path is available.
 
-   Endpoints use Sender's Destination Connection ID Sequence Number
-   field in PATH_STATUS frame to identify which path’s state is going to
-   be changed.  Notice that PATH_STATUS frame can be sent via a
-   different path.  An Endpoint MAY ignore the PATH_STATUS frame if it
-   would make all the paths unavailable in a single connection.
+   Endpoints use Destination Connection ID Sequence Number field in
+   PATH_STATUS frame to identify which path state is going to be
+   changed.  Notice that PATH_STATUS frame can be sent via a different
+   path.  An Endpoint MAY ignore the PATH_STATUS frame if it would make
+   all the paths unavailable in a single connection.
 
 4.3.  Path Close
 
@@ -419,8 +419,8 @@ Table of Contents
    Both endpoints, namely the client and the server, can close a path,
    by sending PATH_ABANDON frame (see Section 8.1) which abandons the
    path with the corresponding Destination Connection ID.  The
-   PATH_ABANDON frame contains the Sender's Destination Connection ID
-   Sequence Number and therefore can be sent on any path.
+   PATH_ABANDON frame contains the Destination Connection ID Sequence
+   Number and therefore can be sent on any path.
 
    Once a path is marked as "abandoned", it means that the resources
    related to the path, such as the used connection IDs, can be
@@ -554,7 +554,7 @@ Table of Contents
     |   Active   |----------------------------------+
     +------------+                                  |
           |                                         |
-          | PATH_ABANDONED sent/received            |
+          | PATH_ABANDON sent/received              |
           v                                         |
     +------------+                                  |
     |   Closing  |                                  |
@@ -594,13 +594,13 @@ Table of Contents
    The endhost can use all the paths in the "Active" state, provided
    that the congestion control and flow control currently allow sending
    of new data on a path.  Note that if a path became idle due to a
-   timeout, endpoints SHOULD send PATH_ABANDONED frame before closing
-   the path.
+   timeout, endpoints SHOULD send PATH_ABANDON frame before closing the
+   path.
 
    In the "Closing" state, the endhost SHOULD NOT send packets on this
    path anymore, as there is no guarantee that the peer can still map
    the packets to the connection.  The endhost SHOULD wait for the
-   acknowledgment of the PATH_ABANDONED frame before moving the path to
+   acknowledgment of the PATH_ABANDON frame before moving the path to
    the "Closed" state to ensure a graceful termination of the path.
 
    When a path reaches the "Closed" state, the endhost releases all the
@@ -624,15 +624,15 @@ Table of Contents
 
    The ACK_MP frame, as specified in Section 8.3, is used to acknowledge
    1-RTT packets.  Compared to the QUIC version 1 ACK frame, the ACK_MP
-   frame additionally contains the Receiver's Destination Connection ID
+   frame additionally contains the receiver's Destination Connection ID
    Sequence Number field to distinguish the Connection ID-specific
    packet number space.
 
    Acknowledgements of Initial and Handshake packets MUST be carried
    using ACK frames, as specified in [QUIC-TRANSPORT].  The ACK frames,
-   as defined in [QUIC-TRANSPORT], do not carry the Receiver's
-   Destination Connection ID Sequence Number field.  If multipath has
-   been successfully negotiated, ACK frames in 1-RTT packets acknowledge
+   as defined in [QUIC-TRANSPORT], do not carry the Destination
+   Connection ID Sequence Number field.  If multipath has been
+   successfully negotiated, ACK frames in 1-RTT packets acknowledge
    packets sent with the Connection ID having sequence number 0.
 
    As soon as the negotiation of multipath support is completed,
@@ -780,27 +780,27 @@ Table of Contents
    use DCID S3, which has a sequence number of 3.  Note that the paths
    use different packet number spaces.  In this case, the client is
    going to close the first path.  It identifies the path by the
-   sequence number of the DCID it uses for sending packets over that
-   path, hence using the path_id 2.  Optionally, the server confirms the
-   path closure by sending an PATH_ABANDON frame by indicating the
-   sequence number of the DCID it uses to send over that path, which
-   corresponds to the sequence number 1 (of C1).  Both the client and
-   the server can close the path after receiving the
-   RETIRE_CONNECTION_ID frame for that path.
+   sequence number of the DCID its peer uses for sending packets over
+   that path, hence using the DCID sequence number 1 (which relates to
+   C1).  Optionally, the server confirms the path closure by sending an
+   PATH_ABANDON frame by indicating the sequence number of the DCID the
+   client uses to send over that path, which corresponds to the sequence
+   number 2 (of S2).  Both the client and the server can close the path
+   after receiving the RETIRE_CONNECTION_ID frame for that path.
 
- Client                                                      Server
+   Client                                                      Server
 
- (client tells server to abandon a path)
- 1-RTT[X]: DCID=S2 PATH_ABANDON[sender_dcid_seq_num=2]->
-                            (server tells client to abandon a path)
-                <-1-RTT[Y]: DCID=C1 PATH_ABANDON[sender_dcid_seq_num=1],
-                                                ACK_MP[PID=2, PN=X]
- (client retires the corresponding CID)
- 1-RTT[U]: DCID=S3 RETIRE_CONNECTION_ID[2], ACK_MP[PID=1, PN=Y] ->
-                             (server retires the corresponding CID)
-  <- 1-RTT[V]: DCID=C2 RETIRE_CONNECTION_ID[1], ACK_MP[PID=3, PN=U]
+   (client tells server to abandon a path)
+   1-RTT[X]: DCID=S2 PATH_ABANDON[dcid_seq_num=1]->
+                              (server tells client to abandon a path)
+                  <-1-RTT[Y]: DCID=C1 PATH_ABANDON[dcid_seq_num=2],
+                                                  ACK_MP[PID=2, PN=X]
+   (client retires the corresponding CID)
+   1-RTT[U]: DCID=S3 RETIRE_CONNECTION_ID[2], ACK_MP[PID=1, PN=Y] ->
+                               (server retires the corresponding CID)
+    <- 1-RTT[V]: DCID=C2 RETIRE_CONNECTION_ID[1], ACK_MP[PID=3, PN=U]
 
-                  Figure 3: Example of closing a path.
+                    Figure 3: Example of closing a path.
 
 7.  Implementation Considerations
 
@@ -955,7 +955,7 @@ Table of Contents
 
      PATH_ABANDON Frame {
        Type (i) = TBD-02 (experiments use 0xbaba05),
-       Sender's Destination Connection ID Sequence Number (i),
+       Destination Connection ID Sequence Number (i),
        Error Code (i),
        Reason Phrase Length (i),
        Reason Phrase (..),
@@ -965,9 +965,9 @@ Table of Contents
 
    PATH_ABANDON frames contain the following fields:
 
-   Sender's Destination Connection ID Sequence Number:  The sequence
-      number of the Destination Connection ID used by the sender of this
-      frame to send packets over the path to abandon.
+   Destination Connection ID Sequence Number:  The sequence number of
+      the Destination Connection ID used by the receiver of the frame to
+      send packets over the path to abandon.
 
    Error Code:  A variable-length integer that indicates the reason for
       abandoning this path.
@@ -999,7 +999,7 @@ Table of Contents
 
      PATH_STATUS Frame {
        Type (i) = TBD-03 (experiments use 0xbaba06),
-       Sender's Destination Connection ID Sequence Number (i),
+       Destination Connection ID Sequence Number (i),
        Path Status sequence number (i),
        Path Status (i),
      }
@@ -1008,18 +1008,17 @@ Table of Contents
 
    PATH_STATUS Frames contain the following fields:
 
-   Sender's Destination Connection ID Sequence Number:  The sequence
-      number of the Destination Connection ID used by the sender of this
-      frame to send packets over the path the status update corresponds
-      to.
+   Destination Connection ID Sequence Number:  The sequence number of
+      the Destination Connection ID used by the receiver of this frame
+      to send packets over the path the status update corresponds to.
 
    Path Status sequence number:  A variable-length integer specifying
       the sequence number assigned for this PATH_STATUS frame.  The
       sequence number MUST be monotonically increasing generated by the
       sender of the PATH_STATUS frame in the same connection.  The
       receiver of the PATH_STATUS frame needs to use and compare the
-      sequence numbers separately for each Sender's Destination
-      Connection ID Sequence Number.
+      sequence numbers separately for each Destination Connection ID
+      Sequence Number.
 
    Available values of Path Status field are:
 
@@ -1036,8 +1035,8 @@ Table of Contents
 
    Frames may be received out of order.  A peer MUST ignore an incoming
    PATH_STATUS frame if it previously received another PATH_STATUS frame
-   for the same Sender's Destination Connection ID Sequence Number with
-   a Path Status sequence number equal to or higher than the Path Status
+   for the same Destination Connection ID Sequence Number with a Path
+   Status sequence number equal to or higher than the Path Status
    sequence number of the incoming frame.
 
    PATH_STATUS frames SHOULD be acknowledged.  If a packet containing a
@@ -1059,7 +1058,7 @@ Table of Contents
 
      ACK_MP Frame {
        Type (i) = TBD-00..TBD-01 (experiments use 0xbaba00..0xbaba01),
-       Receiver's Destination Connection ID Sequence Number (i),
+       Destination Connection ID Sequence Number (i),
        Largest Acknowledged (i),
        ACK Delay (i),
        ACK Range Count (i),
@@ -1073,9 +1072,9 @@ Table of Contents
    Compared to the ACK frame specified in [QUIC-TRANSPORT], the
    following field is added.
 
-   Receiver's Destination Connection ID Sequence Number:  The sequence
-      number of the Connection ID identifying the packet number space of
-      the 1-RTT packets which are acknowledged by the ACK_MP frame.
+   Destination Connection ID Sequence Number:  The sequence number of
+      the Connection ID identifying the packet number space of the 1-RTT
+      packets which are acknowledged by the ACK_MP frame.
 
    If an endpoint receives an ACK_MP frame with a Connection ID sequence
    number which was never issued (i.e., with a sequence number larger
