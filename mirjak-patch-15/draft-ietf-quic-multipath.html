@@ -1057,7 +1057,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Liu, et al.</td>
-<td class="center">Expires 8 September 2023</td>
+<td class="center">Expires 9 September 2023</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1070,12 +1070,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-ietf-quic-multipath-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2023-03-07" class="published">7 March 2023</time>
+<time datetime="2023-03-08" class="published">8 March 2023</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2023-09-08">8 September 2023</time></dd>
+<dd class="expires"><time datetime="2023-09-09">9 September 2023</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1144,7 +1144,7 @@ enable the simultaneous usage of multiple paths for a single connection.<a href=
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 8 September 2023.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 9 September 2023.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1715,29 +1715,39 @@ PATH_CHALLENGE arrives in a packet using a non-zero length Connection ID.<a href
           <h4 id="name-effect-of-retire_connection">
 <a href="#section-4.3.3" class="section-number selfRef">4.3.3. </a><a href="#name-effect-of-retire_connection" class="section-name selfRef">Effect of RETIRE_CONNECTION_ID Frame</a>
           </h4>
-<p id="section-4.3.3-1">Receiving a RETIRE_CONNECTION_ID frame causes the endpoint to discard
-the resources associated with that Connection ID. If the connection ID
-was used by the peer to identify a path from the peer to this endpoint,
-the resources include the list of received packets used to send
-acknowledgements. The peer can keep sending data using
+<p id="section-4.3.3-1">Receiving a RETIRE_CONNECTION_ID frame causes an endpoint to discard
+the resources associated with that Connection ID. Specifically, the endpoint
+should not use the sequence number of the retired connection ID anymore in
+any control frames, as the peer will not be able to associate those frames to
+a path and will therefore ingore them. This means an endpoint is also not required
+to acknowledge any late packets carrying that Connection ID and, hence,
+it can remove the list of received packets used to send acknowledgements after
+receiving the RETIRE_CONNECTION_ID frame.<a href="#section-4.3.3-1" class="pilcrow">¶</a></p>
+<p id="section-4.3.3-2">The peer, that sent RETIRE_CONNECTION_ID frame, can keep sending data using
 the same IP addresses and UDP ports previously associated with
-the connection ID, but MUST use a different connection ID when doing so.
-This can happen if, e.g., the Connection ID issuer requests retirement of a
-Connection ID using the Retire Prior To field in the NEW_CONNECTION_ID frame.
+that Connection ID, but MUST use a different connection ID when doing so.
 If no new connection ID is available anymore, the endpoint cannot send on
-this path and is not able to send control frames associated to this path anymore.
-However, it can still acknowledge packets received on the path, by sending ACK_MP frames
-on another path, if available. If no data is received on this path, the idle time-out will close
-the path. The endpoint can re-activate the path if a new Connection ID gets issued
-by its peer over another path before the idle timer expires.<a href="#section-4.3.3-1" class="pilcrow">¶</a></p>
-<p id="section-4.3.3-2">Note that if the sender retires a Connection ID that is still used by
+this path. This can happen if, e.g., the Connection ID issuer requests retirement of a
+Connection ID using the Retire Prior To field in the NEW_CONNECTION_ID frame but does
+provide sufficient new CIDs.<a href="#section-4.3.3-2" class="pilcrow">¶</a></p>
+<p id="section-4.3.3-3">Note that even if a peer cannot send on a path anymore because it does not have
+a valid Connection ID to use, it can still acknowledge packets received on the path,
+by sending ACK_MP frames on another path, if available. But also note that,
+as there is no valid CID associated with the path, the other end cannot send
+multipath control frames that contain the sequence number of a Connection ID, such
+as PATH_ABANDON or PATH_STATUS.<a href="#section-4.3.3-3" class="pilcrow">¶</a></p>
+<p id="section-4.3.3-4">If the peer cannot send on a path and no data is received on the path, the idle time-out will close
+the path. If, before the idle timer expires, a new Connection ID gets issued
+by its peer over another path, the endpoint can re-activate the path by
+sending a packet with a new Connection ID on that path.<a href="#section-4.3.3-4" class="pilcrow">¶</a></p>
+<p id="section-4.3.3-5">If the sender retires a Connection ID that is still used by
 in-flight packets, it may receive ACK_MP frames referencing the retired
 Connection ID. If the sender stops tracking sent packets with retired
 Connection ID, these would be spuriously marked as lost. To avoid such
 performance issue without keeping retired Connection ID state, an
 endpoint should first stop sending packets with the to-be-retired
 Connection ID, then wait for all in-flight packets to be either
-acknowledged or marked as lost, and finally retire the Connection ID.<a href="#section-4.3.3-2" class="pilcrow">¶</a></p>
+acknowledged or marked as lost, and finally retire the Connection ID.<a href="#section-4.3.3-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="idle-time-close">
