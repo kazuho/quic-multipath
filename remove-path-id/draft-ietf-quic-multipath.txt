@@ -5,7 +5,7 @@
 QUIC Working Group                                           Y. Liu, Ed.
 Internet-Draft                                                     Y. Ma
 Intended status: Standards Track                            Alibaba Inc.
-Expires: 8 September 2023                             Q. De Coninck, Ed.
+Expires: 9 September 2023                             Q. De Coninck, Ed.
                                                                UCLouvain
                                                           O. Bonaventure
                                                   UCLouvain and Tessares
@@ -13,7 +13,7 @@ Expires: 8 September 2023                             Q. De Coninck, Ed.
                                                     Private Octopus Inc.
                                                       M. Kuehlewind, Ed.
                                                                 Ericsson
-                                                            7 March 2023
+                                                            8 March 2023
 
 
                       Multipath Extension for QUIC
@@ -51,7 +51,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 8 September 2023.
+   This Internet-Draft will expire on 9 September 2023.
 
 Copyright Notice
 
@@ -1079,11 +1079,7 @@ Table of Contents
    If an endpoint receives an ACK_MP frame with a Connection ID sequence
    number which was never issued (i.e., with a sequence number larger
    than the largest one advertised), it MUST treat this as a connection
-   error of type MP_PROTOCOL_VIOLATION and close the connection.  If an
-   endpoint receives an ACK_MP frame with a Connection ID sequence
-   number which is no more active (e.g., retired by a
-   RETIRE_CONNECTION_ID frame or belonging to closed paths), it MUST
-   ignore the ACK_MP frame without causing a connection error.
+   error of type MP_PROTOCOL_VIOLATION and close the connection.
 
 9.  Error Codes
 
