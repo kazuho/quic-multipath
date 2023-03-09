@@ -5,7 +5,7 @@
 QUIC Working Group                                           Y. Liu, Ed.
 Internet-Draft                                                     Y. Ma
 Intended status: Standards Track                            Alibaba Inc.
-Expires: 9 September 2023                             Q. De Coninck, Ed.
+Expires: 10 September 2023                            Q. De Coninck, Ed.
                                                                UCLouvain
                                                           O. Bonaventure
                                                   UCLouvain and Tessares
@@ -13,7 +13,7 @@ Expires: 9 September 2023                             Q. De Coninck, Ed.
                                                     Private Octopus Inc.
                                                       M. Kuehlewind, Ed.
                                                                 Ericsson
-                                                            8 March 2023
+                                                            9 March 2023
 
 
                       Multipath Extension for QUIC
@@ -51,7 +51,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 9 September 2023.
+   This Internet-Draft will expire on 10 September 2023.
 
 Copyright Notice
 
@@ -420,7 +420,7 @@ Table of Contents
 4.3.1.  Use PATH_ABANDON Frame to Close a Path
 
    Both endpoints, namely the client and the server, can initiate path
-   closure, by sending PATH_ABANDON frame (see Section 8.1) which which
+   closure, by sending a PATH_ABANDON frame (see Section 8.1) which
    requests the peer to stop sending packets with the corresponding
    Destination Connection ID.  The PATH_ABANDON frame contains the
    Destination Connection ID Sequence Number and therefore can be sent
