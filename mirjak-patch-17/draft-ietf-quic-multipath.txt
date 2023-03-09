@@ -428,10 +428,6 @@ Table of Contents
    by sending PATH_ABANDON frame (see Section 8.1) which abandons the
    path with a corresponding Path Identifier.
 
-   The endpoint sending the PATH_ABANDON frame can consider a path as
-   abandoned when the packet that contained the PATH_ABANDON frame is
-   acknowledged.
-
    The receiver of a PATH_ABANDON frame should not release its resources
    immediately, but SHOULD wait for at least three times the current
    Probe Timeout (PTO) interval as defined in Section 6.2. of
