@@ -5,7 +5,7 @@
 QUIC Working Group                                           Y. Liu, Ed.
 Internet-Draft                                                     Y. Ma
 Intended status: Standards Track                            Alibaba Inc.
-Expires: 9 September 2023                             Q. De Coninck, Ed.
+Expires: 10 September 2023                            Q. De Coninck, Ed.
                                                                UCLouvain
                                                           O. Bonaventure
                                                   UCLouvain and Tessares
@@ -13,7 +13,7 @@ Expires: 9 September 2023                             Q. De Coninck, Ed.
                                                     Private Octopus Inc.
                                                       M. Kuehlewind, Ed.
                                                                 Ericsson
-                                                            8 March 2023
+                                                            9 March 2023
 
 
                       Multipath Extension for QUIC
@@ -51,7 +51,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 9 September 2023.
+   This Internet-Draft will expire on 10 September 2023.
 
 Copyright Notice
 
@@ -448,11 +448,10 @@ Table of Contents
    a mobility event.  The PATH_ABANDON frame therefore recommends to the
    receiver that no packets should be sent on that path anymore.  In
    addition, the RETIRE_CONNECTION_ID frame is used indicate to the
-   receiving peer that the sender does not intend to send any packets
-   assiciated to the Connection ID used on that path anymore.  The
-   receiver of an PATH_ABANDON frame MAY also send an PATH_ABANDON frame
-   to indicate its own unwillingness to receive any packet on this path
-   anymore.
+   receiving peer that the sender will not send any packets associated
+   to the Connection ID used on that path anymore.  The receiver of an
+   PATH_ABANDON frame MAY also send an PATH_ABANDON frame to indicate
+   its own unwillingness to receive any packet on this path anymore.
 
    PATH_ABANDON frames can be sent on any path, not only the path that
    is intended to be closed.  Thus, a path can be abandoned even if
