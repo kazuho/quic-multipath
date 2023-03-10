@@ -1247,22 +1247,25 @@ enable the simultaneous usage of multiple paths for a single connection.<a href=
             <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-implementation-consideratio" class="internal xref">Implementation Considerations</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.1">
-                <p id="section-toc.1-1.7.2.1.1"><a href="#section-7.1" class="auto internal xref">7.1</a>.  <a href="#name-congestion-control" class="internal xref">Congestion Control</a></p>
+                <p id="section-toc.1-1.7.2.1.1"><a href="#section-7.1" class="auto internal xref">7.1</a>.  <a href="#name-number-spaces" class="internal xref">Number Spaces</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.2">
-                <p id="section-toc.1-1.7.2.2.1"><a href="#section-7.2" class="auto internal xref">7.2</a>.  <a href="#name-computing-path-rtt" class="internal xref">Computing Path RTT</a></p>
+                <p id="section-toc.1-1.7.2.2.1"><a href="#section-7.2" class="auto internal xref">7.2</a>.  <a href="#name-congestion-control" class="internal xref">Congestion Control</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.3">
-                <p id="section-toc.1-1.7.2.3.1"><a href="#section-7.3" class="auto internal xref">7.3</a>.  <a href="#name-packet-scheduling" class="internal xref">Packet Scheduling</a></p>
+                <p id="section-toc.1-1.7.2.3.1"><a href="#section-7.3" class="auto internal xref">7.3</a>.  <a href="#name-computing-path-rtt" class="internal xref">Computing Path RTT</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.4">
-                <p id="section-toc.1-1.7.2.4.1"><a href="#section-7.4" class="auto internal xref">7.4</a>.  <a href="#name-retransmissions" class="internal xref">Retransmissions</a></p>
+                <p id="section-toc.1-1.7.2.4.1"><a href="#section-7.4" class="auto internal xref">7.4</a>.  <a href="#name-packet-scheduling" class="internal xref">Packet Scheduling</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.5">
-                <p id="section-toc.1-1.7.2.5.1"><a href="#section-7.5" class="auto internal xref">7.5</a>.  <a href="#name-handling-different-pmtu-siz" class="internal xref">Handling different PMTU sizes</a></p>
+                <p id="section-toc.1-1.7.2.5.1"><a href="#section-7.5" class="auto internal xref">7.5</a>.  <a href="#name-retransmissions" class="internal xref">Retransmissions</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.6">
-                <p id="section-toc.1-1.7.2.6.1"><a href="#section-7.6" class="auto internal xref">7.6</a>.  <a href="#name-keep-alive" class="internal xref">Keep Alive</a></p>
+                <p id="section-toc.1-1.7.2.6.1"><a href="#section-7.6" class="auto internal xref">7.6</a>.  <a href="#name-handling-different-pmtu-siz" class="internal xref">Handling different PMTU sizes</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.7">
+                <p id="section-toc.1-1.7.2.7.1"><a href="#section-7.7" class="auto internal xref">7.7</a>.  <a href="#name-keep-alive" class="internal xref">Keep Alive</a></p>
 </li>
             </ul>
 </li>
@@ -2064,20 +2067,109 @@ Client                                                      Server
       <h2 id="name-implementation-consideratio">
 <a href="#section-7" class="section-number selfRef">7. </a><a href="#name-implementation-consideratio" class="section-name selfRef">Implementation Considerations</a>
       </h2>
-<div id="congestion-control">
+<div id="number-spaces">
 <section id="section-7.1">
-        <h3 id="name-congestion-control">
-<a href="#section-7.1" class="section-number selfRef">7.1. </a><a href="#name-congestion-control" class="section-name selfRef">Congestion Control</a>
+        <h3 id="name-number-spaces">
+<a href="#section-7.1" class="section-number selfRef">7.1. </a><a href="#name-number-spaces" class="section-name selfRef">Number Spaces</a>
         </h3>
-<p id="section-7.1-1">When the QUIC multipath extension is used, senders manage per-path
+<p id="section-7.1-1">As stated in <a href="#introduction" class="auto internal xref">Section 1</a>, when multipath is negotiated, each
+Destination Connection ID is linked to a separate packet number space.
+This a big difference between implementations of QUIC as specified in
+<span>[<a href="#QUIC-TRANSPORT" class="cite xref">QUIC-TRANSPORT</a>]</span>, which only have to manage three number spaces for Initial,
+Handshake and Application packets.<a href="#section-7.1-1" class="pilcrow">¶</a></p>
+<p id="section-7.1-2">Implementation of multipath capable QUIC will need to carefully
+model the relations between paths and number spaces, as shown
+in <a href="#fig-number-spaces" class="auto internal xref">Figure 4</a>.<a href="#section-7.1-2" class="pilcrow">¶</a></p>
+<span id="name-send-and-receive-number-spa"></span><div id="fig-number-spaces">
+<figure id="figure-4">
+          <div class="alignLeft art-text artwork" id="section-7.1-3.1">
+<pre>
+   +-------------------------+
+   | CID received from peer: |
+   | Previous Sender Number  |
+   | Space                   |-- - - - - - +
+   +-------------------------+
+   +-------------------------+             |
+   | CID received from peer: |
+   | Sender Number Space     |             |
+   +-------------------------+             v
+                      ^             +----------------+
+                      |             | Path (4 tuple) |
+                      +-------------| - RTT          |
+                +------------------&gt;| - Congestion   |
+                |                   |   state        |
+                v                   +----------------+
+   +-------------------------+             ^
+   | CID provided to peer:   |             |
+   | Receiver Number Space   |
+   +-------------------------+             |
+   +-------------------------+
+   | CID previously used by  |-- - - - - - +
+   | Peer: old Receiver      |
+   | Number Space            |
+   +-------------------------+
+</pre>
+</div>
+<figcaption><a href="#figure-4" class="selfRef">Figure 4</a>:
+<a href="#name-send-and-receive-number-spa" class="selfRef">Send and Receive number spaces</a>
+          </figcaption></figure>
+</div>
+<p id="section-7.1-4">The path is defined by the 4-tuple through which packets are
+received and sent. Packets sent on the path will include the
+Destination Connection ID currently used for that path, selected
+from the list of CID provided by the peer. Packets received
+on the path carry a Destination CID selected by the peer from
+the list provided to that peer.<a href="#section-7.1-4" class="pilcrow">¶</a></p>
+<p id="section-7.1-5">The relation between CIDs and paths is not fixed. A node may
+decide to rotate the Destination CID it uses, a NAT may decide
+to change the 4-tuple over which packets from that path will be
+received.
+Implementation will have to manage these evolving relations.<a href="#section-7.1-5" class="pilcrow">¶</a></p>
+<p id="section-7.1-6">Data associated with the transmission and reception on a given
+path can be associated to either the "path state", or to the
+state of either the sender or receiver number spaces. For example:<a href="#section-7.1-6" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-7.1-7.1">RTT measurements and congestion state are logically associated
+with the 4-tuple. They will remain unchanged if data starts
+being received or sent through the same 4-tuple using new CIDs.<a href="#section-7.1-7.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-7.1-7.2">Implementations of loss recovery typically maintain lists of
+packets sent and not yet acknowledged. Such information, along
+with the value of the next PN to use for sending, is
+logically associated with the "Sender Number Space", and
+with the peer-provided CID used for sending on the path.<a href="#section-7.1-7.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-7.1-7.3">Sending of acknowledgement requires keeping track of the PN of
+received packets and of acknowledgements previously sent. Such
+information is logically associated with the "Receiver Number Space",
+and with the CID used by the peer for sending on the path.<a href="#section-7.1-7.3" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-7.1-8">When the link between paths and CID changes, the information tied
+to the now unused CID remains useful for some time. For example,
+the list of packet numbers to acknowledge maintained in the old
+receiver number space could still be used to send ACK_MP frames
+for that number space. Similarly, the list of packets sent but
+not yet acknowledged with an old sender number space can be used
+when processing incoming ACK_MP frames for that number space. Such
+data should not be discarded immediately after a CID change, but
+only later, for example when the CID is retired.<a href="#section-7.1-8" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="congestion-control">
+<section id="section-7.2">
+        <h3 id="name-congestion-control">
+<a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-congestion-control" class="section-name selfRef">Congestion Control</a>
+        </h3>
+<p id="section-7.2-1">When the QUIC multipath extension is used, senders manage per-path
 congestion status as required in <span><a href="https://rfc-editor.org/rfc/rfc9000#section-9.4" class="relref">Section 9.4</a> of [<a href="#QUIC-TRANSPORT" class="cite xref">QUIC-TRANSPORT</a>]</span>.
 However, in <span>[<a href="#QUIC-TRANSPORT" class="cite xref">QUIC-TRANSPORT</a>]</span> only one active path is assumed and as such
 the requirement is to reset the congestion control status on path migration.
 With the multipath extension, multiple paths can be used simultaneously,
 therefore separate congestion control state is maintained for each path.
 This means a sender is not allowed to send more data on a given path
-than congestion control for that path indicates.<a href="#section-7.1-1" class="pilcrow">¶</a></p>
-<p id="section-7.1-2">When a Multipath QUIC connection uses two or more paths, there is no
+than congestion control for that path indicates.<a href="#section-7.2-1" class="pilcrow">¶</a></p>
+<p id="section-7.2-2">When a Multipath QUIC connection uses two or more paths, there is no
 guarantee that these paths are fully disjoint. When two (or more paths)
 share the same bottleneck, using a standard congestion control scheme
 could result in an unfair distribution of the bandwidth with
@@ -2085,15 +2177,15 @@ the multipath connection getting more bandwidth than competing single
 paths connections. Multipath TCP uses the LIA congestion control scheme
 specified in <span>[<a href="#RFC6356" class="cite xref">RFC6356</a>]</span> to solve this problem.  This scheme can
 immediately be adapted to Multipath QUIC. Other coupled congestion
-control schemes have been proposed for Multipath TCP such as <span>[<a href="#OLIA" class="cite xref">OLIA</a>]</span>.<a href="#section-7.1-2" class="pilcrow">¶</a></p>
+control schemes have been proposed for Multipath TCP such as <span>[<a href="#OLIA" class="cite xref">OLIA</a>]</span>.<a href="#section-7.2-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="compute-rtt">
-<section id="section-7.2">
+<section id="section-7.3">
         <h3 id="name-computing-path-rtt">
-<a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-computing-path-rtt" class="section-name selfRef">Computing Path RTT</a>
+<a href="#section-7.3" class="section-number selfRef">7.3. </a><a href="#name-computing-path-rtt" class="section-name selfRef">Computing Path RTT</a>
         </h3>
-<p id="section-7.2-1">Acknowledgement delays are the sum of two one-way delays, the delay
+<p id="section-7.3-1">Acknowledgement delays are the sum of two one-way delays, the delay
 on the packet sending path and the delay on the return path chosen
 for the acknowledgements.  When different paths have different
 characteristics, this can cause acknowledgement delays to vary
@@ -2102,7 +2194,7 @@ terrestrial path, with a latency of 50ms in each direction, and a
 geostationary satellite path, with a latency of 300ms in both
 directions.  The acknowledgement delay will depend on the combination
 of paths used for the packet transmission and the ACK transmission,
-as shown in <a href="#fig-example-ack-delay" class="auto internal xref">Table 2</a>.<a href="#section-7.2-1" class="pilcrow">¶</a></p>
+as shown in <a href="#fig-example-ack-delay" class="auto internal xref">Table 2</a>.<a href="#section-7.3-1" class="pilcrow">¶</a></p>
 <span id="name-example-of-ack-delays-using"></span><div id="fig-example-ack-delay">
 <table class="center" id="table-2">
           <caption>
@@ -2130,21 +2222,21 @@ as shown in <a href="#fig-example-ack-delay" class="auto internal xref">Table 2<
           </tbody>
         </table>
 </div>
-<p id="section-7.2-3">Using the default algorithm specified in <span>[<a href="#QUIC-RECOVERY" class="cite xref">QUIC-RECOVERY</a>]</span> would result
+<p id="section-7.3-3">Using the default algorithm specified in <span>[<a href="#QUIC-RECOVERY" class="cite xref">QUIC-RECOVERY</a>]</span> would result
 in suboptimal performance, computing average RTT and standard
 deviation from series of different delay measurements of different
 combined paths.  At the same time, early tests showed that it is
 desirable to send ACKs through the shortest path because a shorter
 ACK delay results in a tighter control loop and better performances.
 The tests also showed that it is desirable to send copies of the ACKs
-on multiple paths, for robustness if a path experiences sudden losses.<a href="#section-7.2-3" class="pilcrow">¶</a></p>
-<p id="section-7.2-4">An early implementation mitigated the delay variation issue by using
+on multiple paths, for robustness if a path experiences sudden losses.<a href="#section-7.3-3" class="pilcrow">¶</a></p>
+<p id="section-7.3-4">An early implementation mitigated the delay variation issue by using
 time stamps, as specified in <span>[<a href="#QUIC-Timestamp" class="cite xref">QUIC-Timestamp</a>]</span>.  When the timestamps
 are present, the implementation can estimate the transmission delay
 on each one-way path, and can then use these one way delays for more
 efficient implementations of recovery and congestion control
-algorithms.<a href="#section-7.2-4" class="pilcrow">¶</a></p>
-<p id="section-7.2-5">If timestamps are not available, implementations could estimate one
+algorithms.<a href="#section-7.3-4" class="pilcrow">¶</a></p>
+<p id="section-7.3-5">If timestamps are not available, implementations could estimate one
 way delays using statistical techniques.  For example, in the example
 shown in Table 1, implementations can use "same path"
 measurements to estimate the one way delay of the terrestrial path to
@@ -2152,27 +2244,27 @@ about 50ms in each direction, and that of the satellite path to about
 300ms.  Further measurements can then be used to maintain estimates
 of one way delay variations, using logical similar to Kalman filters.
 But statistical processing is error-prone, and using time stamps
-provides more robust measurements.<a href="#section-7.2-5" class="pilcrow">¶</a></p>
+provides more robust measurements.<a href="#section-7.3-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="packet-scheduling">
-<section id="section-7.3">
+<section id="section-7.4">
         <h3 id="name-packet-scheduling">
-<a href="#section-7.3" class="section-number selfRef">7.3. </a><a href="#name-packet-scheduling" class="section-name selfRef">Packet Scheduling</a>
+<a href="#section-7.4" class="section-number selfRef">7.4. </a><a href="#name-packet-scheduling" class="section-name selfRef">Packet Scheduling</a>
         </h3>
-<p id="section-7.3-1">The transmission of QUIC packets on a regular QUIC connection is regulated
+<p id="section-7.4-1">The transmission of QUIC packets on a regular QUIC connection is regulated
 by the arrival of data from the application and the congestion control
 scheme. QUIC packets can only be sent when the congestion window of
-at least one path is open.<a href="#section-7.3-1" class="pilcrow">¶</a></p>
-<p id="section-7.3-2">Multipath QUIC implementations also need to include a packet scheduler
+at least one path is open.<a href="#section-7.4-1" class="pilcrow">¶</a></p>
+<p id="section-7.4-2">Multipath QUIC implementations also need to include a packet scheduler
 that decides, among the paths whose congestion window is open, the path
 over which the next QUIC packet will be sent. Many factors can influence
 the definition of these algorithms and their precise definition is
 outside the scope of this document. Various packet schedulers have been
 proposed and implemented, notably for Multipath TCP. A companion draft
 <span>[<a href="#I-D.bonaventure-iccrg-schedulers" class="cite xref">I-D.bonaventure-iccrg-schedulers</a>]</span> provides several general-purpose
-packet schedulers depending on the application goals.<a href="#section-7.3-2" class="pilcrow">¶</a></p>
-<p id="section-7.3-3">Note that the receiver could use a different scheduling strategy to send
+packet schedulers depending on the application goals.<a href="#section-7.4-2" class="pilcrow">¶</a></p>
+<p id="section-7.4-3">Note that the receiver could use a different scheduling strategy to send
 ACK(_MP) frames. The recommended default behaviour consists in sending
 ACK(_MP) frames on the path they acknowledge packets. Other scheduling
 strategies, such as sending ACK(_MP) frames on the lowest latency
@@ -2180,47 +2272,47 @@ path, might be considered, but they could impact the sender with side
 effects on, e.g., the RTT estimation or the congestion control scheme.
 When adopting such asymetrical acknowledgment scheduling, the receiver
 should at least ensure that the sender negotiated one-way delay
-calculation mechanism (e.g., <span>[<a href="#QUIC-Timestamp" class="cite xref">QUIC-Timestamp</a>]</span>).<a href="#section-7.3-3" class="pilcrow">¶</a></p>
+calculation mechanism (e.g., <span>[<a href="#QUIC-Timestamp" class="cite xref">QUIC-Timestamp</a>]</span>).<a href="#section-7.4-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="retransmissions">
-<section id="section-7.4">
+<section id="section-7.5">
         <h3 id="name-retransmissions">
-<a href="#section-7.4" class="section-number selfRef">7.4. </a><a href="#name-retransmissions" class="section-name selfRef">Retransmissions</a>
+<a href="#section-7.5" class="section-number selfRef">7.5. </a><a href="#name-retransmissions" class="section-name selfRef">Retransmissions</a>
         </h3>
-<p id="section-7.4-1">Simultaneous use of multiple paths enables different
+<p id="section-7.5-1">Simultaneous use of multiple paths enables different
 retransmission strategies to cope with losses such as:
 a) retransmitting lost frames over the
 same path, b) retransmitting lost frames on a different or
 dedicated path, and c) duplicate lost frames on several paths (not
 recommended for general purpose use due to the network
 overhead). While this document does not preclude a specific
-strategy, more detailed specification is out of scope.<a href="#section-7.4-1" class="pilcrow">¶</a></p>
+strategy, more detailed specification is out of scope.<a href="#section-7.5-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="handling-different-pmtu-sizes">
-<section id="section-7.5">
+<section id="section-7.6">
         <h3 id="name-handling-different-pmtu-siz">
-<a href="#section-7.5" class="section-number selfRef">7.5. </a><a href="#name-handling-different-pmtu-siz" class="section-name selfRef">Handling different PMTU sizes</a>
+<a href="#section-7.6" class="section-number selfRef">7.6. </a><a href="#name-handling-different-pmtu-siz" class="section-name selfRef">Handling different PMTU sizes</a>
         </h3>
-<p id="section-7.5-1">An implementation should take care to handle different PMTU sizes across
+<p id="section-7.6-1">An implementation should take care to handle different PMTU sizes across
 multiple paths. One simple option if the PMTUs are relatively similar is to apply the minimum PMTU of all paths to
 each path. The benefit of such an approach is to simplify retransmission
 processing as the content of lost packets initially sent on one path can be sent
-on another path without further frame scheduling adaptations.<a href="#section-7.5-1" class="pilcrow">¶</a></p>
+on another path without further frame scheduling adaptations.<a href="#section-7.6-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="keep-alive">
-<section id="section-7.6">
+<section id="section-7.7">
         <h3 id="name-keep-alive">
-<a href="#section-7.6" class="section-number selfRef">7.6. </a><a href="#name-keep-alive" class="section-name selfRef">Keep Alive</a>
+<a href="#section-7.7" class="section-number selfRef">7.7. </a><a href="#name-keep-alive" class="section-name selfRef">Keep Alive</a>
         </h3>
-<p id="section-7.6-1">The QUIC specification defines an optional keep alive process, see <span><a href="https://rfc-editor.org/rfc/rfc9000#section-5.3" class="relref">Section 5.3</a> of [<a href="#QUIC-TRANSPORT" class="cite xref">QUIC-TRANSPORT</a>]</span>.
+<p id="section-7.7-1">The QUIC specification defines an optional keep alive process, see <span><a href="https://rfc-editor.org/rfc/rfc9000#section-5.3" class="relref">Section 5.3</a> of [<a href="#QUIC-TRANSPORT" class="cite xref">QUIC-TRANSPORT</a>]</span>.
 Implementations of the multipath extension should map this keep alive process to a number of paths.
 Some applications may wish to ensure that one path remains active, while others could prefer to have
 two or more active paths during the connection lifetime. Different applications will likely require different strategies.
 Once the implementation has decided which paths to keep alive, it can do so by sending Ping frames
-on each of these paths before the idle timeout expires.<a href="#section-7.6-1" class="pilcrow">¶</a></p>
+on each of these paths before the idle timeout expires.<a href="#section-7.7-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -2244,9 +2336,9 @@ as a connection error and close the connection.<a href="#section-8-2" class="pil
 path. More complex path management can
 be made possible with additional extensions (e.g., PATH_STATUS frame in
 <span>[<a href="#I-D.liu-multipath-quic" class="cite xref">I-D.liu-multipath-quic</a>]</span> ).<a href="#section-8.1-1" class="pilcrow">¶</a></p>
-<p id="section-8.1-2">PATH_ABANDON frames are formatted as shown in <a href="#fig-path-abandon-format" class="auto internal xref">Figure 4</a>.<a href="#section-8.1-2" class="pilcrow">¶</a></p>
+<p id="section-8.1-2">PATH_ABANDON frames are formatted as shown in <a href="#fig-path-abandon-format" class="auto internal xref">Figure 5</a>.<a href="#section-8.1-2" class="pilcrow">¶</a></p>
 <span id="name-path_abandon-frame-format"></span><div id="fig-path-abandon-format">
-<figure id="figure-4">
+<figure id="figure-5">
           <div class="alignLeft art-text artwork" id="section-8.1-3.1">
 <pre>
   PATH_ABANDON Frame {
@@ -2258,7 +2350,7 @@ be made possible with additional extensions (e.g., PATH_STATUS frame in
   }
 </pre>
 </div>
-<figcaption><a href="#figure-4" class="selfRef">Figure 4</a>:
+<figcaption><a href="#figure-5" class="selfRef">Figure 5</a>:
 <a href="#name-path_abandon-frame-format" class="selfRef">PATH_ABANDON Frame Format</a>
           </figcaption></figure>
 </div>
@@ -2310,9 +2402,9 @@ Connection ID is used.<a href="#section-8.1-7" class="pilcrow">¶</a></p>
 <p id="section-8.2-1">PATH_STATUS Frame are used by endpoints to inform the peer of the current
 status of one path, and the peer should send packets according to
 the preference expressed in these frames.
-PATH_STATUS frames are formatted as shown in <a href="#fig-path-status-format" class="auto internal xref">Figure 5</a>.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
+PATH_STATUS frames are formatted as shown in <a href="#fig-path-status-format" class="auto internal xref">Figure 6</a>.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
 <span id="name-path_status-frame-format"></span><div id="fig-path-status-format">
-<figure id="figure-5">
+<figure id="figure-6">
           <div class="alignLeft art-text artwork" id="section-8.2-2.1">
 <pre>
   PATH_STATUS Frame {
@@ -2323,7 +2415,7 @@ PATH_STATUS frames are formatted as shown in <a href="#fig-path-status-format" c
   }
 </pre>
 </div>
-<figcaption><a href="#figure-5" class="selfRef">Figure 5</a>:
+<figcaption><a href="#figure-6" class="selfRef">Figure 6</a>:
 <a href="#name-path_status-frame-format" class="selfRef">PATH_STATUS Frame Format</a>
           </figcaption></figure>
 </div>
@@ -2383,9 +2475,9 @@ used to acknowledge packets that were sent on different paths using
 multiple packet number spaces. If the frame type is TBD-01, ACK_MP frames
 also contain the sum of QUIC packets with associated ECN marks received
 on the connection up to this point.<a href="#section-8.3-1" class="pilcrow">¶</a></p>
-<p id="section-8.3-2">ACK_MP frame is formatted as shown in <a href="#fig-ack-mp-format" class="auto internal xref">Figure 6</a>.<a href="#section-8.3-2" class="pilcrow">¶</a></p>
+<p id="section-8.3-2">ACK_MP frame is formatted as shown in <a href="#fig-ack-mp-format" class="auto internal xref">Figure 7</a>.<a href="#section-8.3-2" class="pilcrow">¶</a></p>
 <span id="name-ack_mp-frame-format"></span><div id="fig-ack-mp-format">
-<figure id="figure-6">
+<figure id="figure-7">
           <div class="alignLeft art-text artwork" id="section-8.3-3.1">
 <pre>
   ACK_MP Frame {
@@ -2400,7 +2492,7 @@ on the connection up to this point.<a href="#section-8.3-1" class="pilcrow">¶</
   }
 </pre>
 </div>
-<figcaption><a href="#figure-6" class="selfRef">Figure 6</a>:
+<figcaption><a href="#figure-7" class="selfRef">Figure 7</a>:
 <a href="#name-ack_mp-frame-format" class="selfRef">ACK_MP Frame Format</a>
           </figcaption></figure>
 </div>

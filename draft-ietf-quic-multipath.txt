@@ -90,12 +90,13 @@ Table of Contents
      6.1.  Path Establishment
      6.2.  Path Closure
    7.  Implementation Considerations
-     7.1.  Congestion Control
-     7.2.  Computing Path RTT
-     7.3.  Packet Scheduling
-     7.4.  Retransmissions
-     7.5.  Handling different PMTU sizes
-     7.6.  Keep Alive
+     7.1.  Number Spaces
+     7.2.  Congestion Control
+     7.3.  Computing Path RTT
+     7.4.  Packet Scheduling
+     7.5.  Retransmissions
+     7.6.  Handling different PMTU sizes
+     7.7.  Keep Alive
    8.  New Frames
      8.1.  PATH_ABANDON Frame
      8.2.  PATH_STATUS frame
@@ -804,7 +805,86 @@ Table of Contents
 
 7.  Implementation Considerations
 
-7.1.  Congestion Control
+7.1.  Number Spaces
+
+   As stated in Section 1, when multipath is negotiated, each
+   Destination Connection ID is linked to a separate packet number
+   space.  This a big difference between implementations of QUIC as
+   specified in [QUIC-TRANSPORT], which only have to manage three number
+   spaces for Initial, Handshake and Application packets.
+
+   Implementation of multipath capable QUIC will need to carefully model
+   the relations between paths and number spaces, as shown in Figure 4.
+
+      +-------------------------+
+      | CID received from peer: |
+      | Previous Sender Number  |
+      | Space                   |-- - - - - - +
+      +-------------------------+
+      +-------------------------+             |
+      | CID received from peer: |
+      | Sender Number Space     |             |
+      +-------------------------+             v
+                         ^             +----------------+
+                         |             | Path (4 tuple) |
+                         +-------------| - RTT          |
+                   +------------------>| - Congestion   |
+                   |                   |   state        |
+                   v                   +----------------+
+      +-------------------------+             ^
+      | CID provided to peer:   |             |
+      | Receiver Number Space   |
+      +-------------------------+             |
+      +-------------------------+
+      | CID previously used by  |-- - - - - - +
+      | Peer: old Receiver      |
+      | Number Space            |
+      +-------------------------+
+
+                  Figure 4: Send and Receive number spaces
+
+   The path is defined by the 4-tuple through which packets are received
+   and sent.  Packets sent on the path will include the Destination
+   Connection ID currently used for that path, selected from the list of
+   CID provided by the peer.  Packets received on the path carry a
+   Destination CID selected by the peer from the list provided to that
+   peer.
+
+   The relation between CIDs and paths is not fixed.  A node may decide
+   to rotate the Destination CID it uses, a NAT may decide to change the
+   4-tuple over which packets from that path will be received.
+   Implementation will have to manage these evolving relations.
+
+   Data associated with the transmission and reception on a given path
+   can be associated to either the "path state", or to the state of
+   either the sender or receiver number spaces.  For example:
+
+   *  RTT measurements and congestion state are logically associated
+      with the 4-tuple.  They will remain unchanged if data starts being
+      received or sent through the same 4-tuple using new CIDs.
+
+   *  Implementations of loss recovery typically maintain lists of
+      packets sent and not yet acknowledged.  Such information, along
+      with the value of the next PN to use for sending, is logically
+      associated with the "Sender Number Space", and with the peer-
+      provided CID used for sending on the path.
+
+   *  Sending of acknowledgement requires keeping track of the PN of
+      received packets and of acknowledgements previously sent.  Such
+      information is logically associated with the "Receiver Number
+      Space", and with the CID used by the peer for sending on the path.
+
+   When the link between paths and CID changes, the information tied to
+   the now unused CID remains useful for some time.  For example, the
+   list of packet numbers to acknowledge maintained in the old receiver
+   number space could still be used to send ACK_MP frames for that
+   number space.  Similarly, the list of packets sent but not yet
+   acknowledged with an old sender number space can be used when
+   processing incoming ACK_MP frames for that number space.  Such data
+   should not be discarded immediately after a CID change, but only
+   later, for example when the CID is retired.
+
+7.2.  Congestion Control
 
    When the QUIC multipath extension is used, senders manage per-path
    congestion status as required in Section 9.4 of [QUIC-TRANSPORT].
@@ -826,7 +906,7 @@ Table of Contents
    immediately be adapted to Multipath QUIC.  Other coupled congestion
    control schemes have been proposed for Multipath TCP such as [OLIA].
 
-7.2.  Computing Path RTT
+7.3.  Computing Path RTT
 
    Acknowledgement delays are the sum of two one-way delays, the delay
    on the packet sending path and the delay on the return path chosen
@@ -877,7 +957,7 @@ Table of Contents
    statistical processing is error-prone, and using time stamps provides
    more robust measurements.
 
-7.3.  Packet Scheduling
+7.4.  Packet Scheduling
 
    The transmission of QUIC packets on a regular QUIC connection is
    regulated by the arrival of data from the application and the
@@ -905,7 +985,7 @@ Table of Contents
    negotiated one-way delay calculation mechanism (e.g.,
    [QUIC-Timestamp]).
 
-7.4.  Retransmissions
+7.5.  Retransmissions
 
    Simultaneous use of multiple paths enables different retransmission
    strategies to cope with losses such as: a) retransmitting lost frames
@@ -915,7 +995,7 @@ Table of Contents
    While this document does not preclude a specific strategy, more
    detailed specification is out of scope.
 
-7.5.  Handling different PMTU sizes
+7.6.  Handling different PMTU sizes
 
    An implementation should take care to handle different PMTU sizes
    across multiple paths.  One simple option if the PMTUs are relatively
@@ -924,7 +1004,7 @@ Table of Contents
    as the content of lost packets initially sent on one path can be sent
    on another path without further frame scheduling adaptations.
 
-7.6.  Keep Alive
+7.7.  Keep Alive
 
    The QUIC specification defines an optional keep alive process, see
    Section 5.3 of [QUIC-TRANSPORT].  Implementations of the multipath
@@ -951,7 +1031,7 @@ Table of Contents
    complex path management can be made possible with additional
    extensions (e.g., PATH_STATUS frame in [I-D.liu-multipath-quic] ).
 
-   PATH_ABANDON frames are formatted as shown in Figure 4.
+   PATH_ABANDON frames are formatted as shown in Figure 5.
 
      PATH_ABANDON Frame {
        Type (i) = TBD-02 (experiments use 0xbaba05),
@@ -961,7 +1041,7 @@ Table of Contents
        Reason Phrase (..),
      }
 
-                    Figure 4: PATH_ABANDON Frame Format
+                    Figure 5: PATH_ABANDON Frame Format
 
    PATH_ABANDON frames contain the following fields:
 
@@ -995,7 +1075,7 @@ Table of Contents
    PATH_STATUS Frame are used by endpoints to inform the peer of the
    current status of one path, and the peer should send packets
    according to the preference expressed in these frames.  PATH_STATUS
-   frames are formatted as shown in Figure 5.
+   frames are formatted as shown in Figure 6.
 
      PATH_STATUS Frame {
        Type (i) = TBD-03 (experiments use 0xbaba06),
@@ -1004,7 +1084,7 @@ Table of Contents
        Path Status (i),
      }
 
-                     Figure 5: PATH_STATUS Frame Format
+                     Figure 6: PATH_STATUS Frame Format
 
    PATH_STATUS Frames contain the following fields:
 
@@ -1054,7 +1134,7 @@ Table of Contents
    with associated ECN marks received on the connection up to this
    point.
 
-   ACK_MP frame is formatted as shown in Figure 6.
+   ACK_MP frame is formatted as shown in Figure 7.
 
      ACK_MP Frame {
        Type (i) = TBD-00..TBD-01 (experiments use 0xbaba00..0xbaba01),
@@ -1067,7 +1147,7 @@ Table of Contents
        [ECN Counts (..)],
      }
 
-                       Figure 6: ACK_MP Frame Format
+                       Figure 7: ACK_MP Frame Format
 
    Compared to the ACK frame specified in [QUIC-TRANSPORT], the
    following field is added.
