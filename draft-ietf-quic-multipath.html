@@ -1875,6 +1875,12 @@ receive packets on this path anymore.<a href="#section-4.4-10" class="pilcrow">�
 This also means that the same packet number can occur on each path and the
 packet number is not a unique identifier anymore. This requires changes to
 the ACK frame as well as packet protection as described in the following subsections.<a href="#section-5-1" class="pilcrow">¶</a></p>
+<p id="section-5-2">When multipath is negotiated,
+each Destination Connection ID is linked to a separate packet number space.
+Each CID-specific packet number space starts at packet number 0. When following
+the packet number encoding algorithm described in <span><a href="https://rfc-editor.org/rfc/rfc9000#appendix-A.2" class="relref">Appendix A.2</a> of [<a href="#QUIC-TRANSPORT" class="cite xref">QUIC-TRANSPORT</a>]</span>,
+the largest packet number (largest_acked) that has been acknowledged by the
+peer in this new CID's packet number space is initially set to "None".<a href="#section-5-2" class="pilcrow">¶</a></p>
 <div id="sending-acknowledgements">
 <section id="section-5.1">
         <h3 id="name-sending-acknowledgements">
