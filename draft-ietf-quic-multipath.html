@@ -1267,6 +1267,9 @@ enable the simultaneous usage of multiple paths for a single connection.<a href=
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.7">
                 <p id="section-toc.1-1.7.2.7.1"><a href="#section-7.7" class="auto internal xref">7.7</a>.  <a href="#name-keep-alive" class="internal xref">Keep Alive</a></p>
 </li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.8">
+                <p id="section-toc.1-1.7.2.8.1"><a href="#section-7.8" class="auto internal xref">7.8</a>.  <a href="#name-connection-id-changes-and-n" class="internal xref">Connection ID Changes and NAT Rebindings</a></p>
+</li>
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
@@ -1348,8 +1351,7 @@ address as well as source and destination port. Therefore, there can be
 at most one active paths/connection ID per 4-tuple.<a href="#section-1-3.6" class="pilcrow">¶</a>
 </li>
         <li class="normal" id="section-1-3.7">If the 4-tuple changes without the use of a new connection ID (e.g.
-due to a NAT rebinding), this is considered as a migration event and not
-as a new path.<a href="#section-1-3.7" class="pilcrow">¶</a>
+due to a NAT rebinding), this is considered as a migration event.<a href="#section-1-3.7" class="pilcrow">¶</a>
 </li>
       </ul>
 <p id="section-1-4">The path management specified in <span><a href="https://rfc-editor.org/rfc/rfc9000#section-9" class="relref">Section 9</a> of [<a href="#QUIC-TRANSPORT" class="cite xref">QUIC-TRANSPORT</a>]</span>
@@ -2331,6 +2333,37 @@ Some applications may wish to ensure that one path remains active, while others 
 two or more active paths during the connection lifetime. Different applications will likely require different strategies.
 Once the implementation has decided which paths to keep alive, it can do so by sending Ping frames
 on each of these paths before the idle timeout expires.<a href="#section-7.7-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="connection-id-changes-and-nat-rebindings">
+<section id="section-7.8">
+        <h3 id="name-connection-id-changes-and-n">
+<a href="#section-7.8" class="section-number selfRef">7.8. </a><a href="#name-connection-id-changes-and-n" class="section-name selfRef">Connection ID Changes and NAT Rebindings</a>
+        </h3>
+<p id="section-7.8-1"><span><a href="https://rfc-editor.org/rfc/rfc9000#section-5.1.2" class="relref">Section 5.1.2</a> of [<a href="#QUIC-TRANSPORT" class="cite xref">QUIC-TRANSPORT</a>]</span> indicates that an endpoint
+can change the Connection ID it uses for to another available one
+at any time during the connection. As such a sole change of the Connection
+ID without any change in the address does not indicate a path change and
+the endpoint can keep the same congestion control and RTT measurement state.<a href="#section-7.8-1" class="pilcrow">¶</a></p>
+<p id="section-7.8-2">While endpoints assign a Connection ID to a specific sending 4-tuple,
+networks events such as NAT rebinding may make the packet's receiver
+observe a different 4-tuple. Servers observing a 4-tuple change will
+performs path validation (see <span><a href="https://rfc-editor.org/rfc/rfc9000#section-9" class="relref">Section 9</a> of [<a href="#QUIC-TRANSPORT" class="cite xref">QUIC-TRANSPORT</a>]</span>).
+If path validation process succeeds, the endpoints set
+the path's congestion controller and round-trip time
+estimator according to <span><a href="https://rfc-editor.org/rfc/rfc9000#section-9.4" class="relref">Section 9.4</a> of [<a href="#QUIC-TRANSPORT" class="cite xref">QUIC-TRANSPORT</a>]</span>.<a href="#section-7.8-2" class="pilcrow">¶</a></p>
+<p id="section-7.8-3"><span><a href="https://rfc-editor.org/rfc/rfc9000#section-9.3" class="relref">Section 9.3</a> of [<a href="#QUIC-TRANSPORT" class="cite xref">QUIC-TRANSPORT</a>]</span> allows an endpoint to skip validation of
+a peer address if that address has been seen recently. However, when the
+multipath extension is used and an endpoint has multiple addresses that
+could lead to switching between different paths, it should rather maintain
+multiple open paths instead.<a href="#section-7.8-3" class="pilcrow">¶</a></p>
+<p id="section-7.8-4">If an endpoint uses a new Connection ID after an idle period
+and a NAT rebinding leads to a 4-tuple changes on the same packet,
+the receiving endpoint may not be able to associate the packet to
+an existing path and will therefore consider this as a new path.
+This leads to an inconsistent view of open paths at both peers,
+however, as the "old" path will not work anymore, it will be silently
+closed after the idle timeout expires.<a href="#section-7.8-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
