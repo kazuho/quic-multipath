@@ -5,7 +5,7 @@
 QUIC Working Group                                           Y. Liu, Ed.
 Internet-Draft                                                     Y. Ma
 Intended status: Standards Track                            Alibaba Inc.
-Expires: 10 September 2023                            Q. De Coninck, Ed.
+Expires: 11 September 2023                            Q. De Coninck, Ed.
                                                                UCLouvain
                                                           O. Bonaventure
                                                   UCLouvain and Tessares
@@ -13,7 +13,7 @@ Expires: 10 September 2023                            Q. De Coninck, Ed.
                                                     Private Octopus Inc.
                                                       M. Kuehlewind, Ed.
                                                                 Ericsson
-                                                            9 March 2023
+                                                           10 March 2023
 
 
                       Multipath Extension for QUIC
@@ -51,7 +51,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 10 September 2023.
+   This Internet-Draft will expire on 11 September 2023.
 
 Copyright Notice
 
@@ -899,8 +899,8 @@ Table of Contents
    The transmission of QUIC packets on a regular QUIC connection is
    regulated by the arrival of data from the application and the
    congestion control scheme.  QUIC packets can only be sent when the
-   congestion window is open.
-
+   congestion window is open.  QUIC packets that increase the number of
+   bytes in flight can only be sent when the congestion window is open.
    Multipath QUIC implementations also need to include a packet
    scheduler that decides, among the paths whose congestion window is
    open, the path over which the next QUIC packet will be sent.  Most
