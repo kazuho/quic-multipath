@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2023-03-09T00:54:29.975060+00:00",
+  "timestamp": "2023-03-12T00:52:42.654492+00:00",
   "repo": "quicwg/multipath",
   "labels": [
     {
@@ -1229,12 +1229,13 @@
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [
+        "separate draft",
         "design",
         "needs-discussion"
       ],
       "body": "In RFC9000 path migration is restricted to clients only, mainly because of problems with NATs which a) is the main use case to have migrations (address change at the client only) and b) could anyway cause failure for mitigation attempts from the server.\r\n\r\nHowever, with multipath, failure of opening a new path is less critical as the old path(s) is not abandon at the same time. Therefore we should further discussion if that restriction is still technical useful or if it can be released easily.\r\n\r\nThis issue was initially discussed as part of issue #31 ",
       "createdAt": "2021-10-25T10:49:06Z",
-      "updatedAt": "2022-03-23T14:41:57Z",
+      "updatedAt": "2023-03-10T14:28:40Z",
       "closedAt": null,
       "comments": [
         {
@@ -1292,6 +1293,13 @@
           "body": "At IETF-113 there were concerns about the implications of this change. While some people were interested in this to support additional use cases, there was also quite some feedback to rather leave that for another extension (maybe together with address discovery mechanism). In any case, more analysis of the implication is needed (e.g. review discussion about this restriction for RFC9000). Leaving this open for now for further discussion.",
           "createdAt": "2022-03-23T14:41:56Z",
           "updatedAt": "2022-03-23T14:41:56Z"
+        },
+        {
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Revisiting this issue now, I agree on the fact that this should be a separate draft. On the other hand, the current draft proposal does not introduce any element that would prevent such server-initiated path in the future, so I suppose the current draft is going in the right direction.",
+          "createdAt": "2023-03-10T14:28:30Z",
+          "updatedAt": "2023-03-10T14:28:30Z"
         }
       ]
     },
@@ -3064,7 +3072,7 @@
       ],
       "body": "The current draft says \"If timestamps are not available, implementations could estimate one way delays using statistical techniques\". I find the word \"statistical\" a bit too broad. Can we elaborate what is the exact statistical method recommended to use? Moreover, \"statistical\" also implies variation and randomness, what happens for applications that do not expect such randomness?",
       "createdAt": "2022-07-08T09:59:55Z",
-      "updatedAt": "2022-11-03T09:01:31Z",
+      "updatedAt": "2023-03-10T14:31:13Z",
       "closedAt": null,
       "comments": [
         {
@@ -3094,6 +3102,13 @@
           "body": "In a Kalman filter, if you have multiple observations, you use a different matrix H for each observation. But you maintain a single evaluation vector, correlation matrix, etc. Each observation operates on a projection of the whole state. \r\n\r\nBut then, I do not suggest that we try implementing a full Kalman filter. That would be a bit too CPU intensive. Also, the Kalman filter is trying for a min-square estimate, which works well for Gaussian variables but is only an approximation for the kind of probability distributions that we are likely to encounter. Implementing a more precise Kalman filter would be more precisely wrong...",
           "createdAt": "2022-07-11T05:47:36Z",
           "updatedAt": "2022-07-11T05:47:36Z"
+        },
+        {
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Revisiting this issue now, I wonder if we should just take the same approach as the scheduling guidance, i.e., say the less and delegate advanced discussions in a potential future draft.",
+          "createdAt": "2023-03-10T14:31:13Z",
+          "updatedAt": "2023-03-10T14:31:13Z"
         }
       ]
     },
@@ -3684,15 +3699,15 @@
       "id": "I_kwDOGNtpaM5ctIPi",
       "title": "Clarify use of RETIRE_CONNECTION_ID frame",
       "url": "https://github.com/quicwg/multipath/issues/158",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "mirjak",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "RFC 9000 defines a way to request a peer to retire old CIDs, but only in-sequence (i.e., all CIDs with a sequence number less than n). This doesn't work when multiple CIDs are in use over different paths and you only want to retire one of them.\r\n\r\n(issue originally raised by @michael-eriksson)",
       "createdAt": "2023-01-24T16:58:02Z",
-      "updatedAt": "2023-02-21T15:46:51Z",
-      "closedAt": null,
+      "updatedAt": "2023-03-10T14:23:40Z",
+      "closedAt": "2023-03-10T14:23:40Z",
       "comments": [
         {
           "author": "yfmascgy",
@@ -3742,6 +3757,13 @@
           "body": "I don't think that's problem. The question why would the CID issuer ask you to retire a CID. Usually this is probably some kind of clean up and in this cases it's actually the purpose that all old CID are replaces with newer ones. I believe this simply how it is intended. However, sure how this is actually implemented and used at the moment.",
           "createdAt": "2023-02-21T15:46:50Z",
           "updatedAt": "2023-02-21T15:46:50Z"
+        },
+        {
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Fixed by #171 that got merged.",
+          "createdAt": "2023-03-10T14:23:40Z",
+          "updatedAt": "2023-03-10T14:23:40Z"
         }
       ]
     },
@@ -3779,7 +3801,7 @@
       "id": "I_kwDOGNtpaM5ctL1R",
       "title": "Clarify support of migration",
       "url": "https://github.com/quicwg/multipath/issues/160",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "mirjak",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -3788,8 +3810,8 @@
       ],
       "body": "RFC9000 allows endpoints to change the CID any time on a path. So it's not automatically a new path if a new CID is seen. This should be noted explicitly in the draft.\r\n\r\nFurther, also migration can happened without endpoint control (NAT rebinding). In this case the server will see a new 4-tuple but no CID change. In line with RFC9000 the server should start path validation and then the client should use a new CID. In case of multipath support we need to clarify if and when this is treated as a new path. If seen as a new path, we would probably need to close the old one (which however is not functional anymore). However, if e.g. only the port number changes, RFC9000 also would also to not reset the congestion control. In this case it would make sense to not treat it as a new path.",
       "createdAt": "2023-01-24T17:07:23Z",
-      "updatedAt": "2023-02-24T08:01:39Z",
-      "closedAt": null,
+      "updatedAt": "2023-03-10T14:16:44Z",
+      "closedAt": "2023-03-10T14:16:44Z",
       "comments": [
         {
           "author": "yfmascgy",
@@ -3885,7 +3907,7 @@
       "id": "I_kwDOGNtpaM5e-kdQ",
       "title": "Does the Path ID change if the CID changes or not?",
       "url": "https://github.com/quicwg/multipath/issues/169",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "mirjak",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -3894,8 +3916,8 @@
       ],
       "body": "Currently it seems that the assumption is that the Path ID changes if the CID changes, however, this makes handling of MP frames that contain the path ID more complicated because you have to remember the old path ID to process these frames even when the CID is retired. Is there any good reason why we don't keep the Path ID constant over the life time of a path?",
       "createdAt": "2023-02-21T13:11:28Z",
-      "updatedAt": "2023-03-06T08:53:52Z",
-      "closedAt": null,
+      "updatedAt": "2023-03-10T02:58:57Z",
+      "closedAt": "2023-03-10T02:58:57Z",
       "comments": [
         {
           "author": "mirjak",
@@ -4256,7 +4278,7 @@
       "id": "I_kwDOGNtpaM5fRCUA",
       "title": "Regular ACK frames when multipath has been negotiated",
       "url": "https://github.com/quicwg/multipath/issues/181",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "michael-eriksson",
       "authorAssociation": "NONE",
       "assignees": [],
@@ -4265,8 +4287,8 @@
       ],
       "body": "# Introduction\r\n\r\nIt should be allowed to send regular ACK frames also after multipath has been negotiated.\r\n\r\n# Reasoning\r\n\r\nSending acknowledgments over other paths than where the packet was received is complex, which is recognised in the Packet Scheduling section of the draft. A straight-forward implementation may therefore never send cross-path acknowledgments. Allowing it to use regular ACK frames would reduce the special-case code for multipath mode and also save at least one byte on every acknowledgment.\r\n\r\nThe specification should be updated to (explicitly) say that an endpoint MAY send regular ACK frames also after multipath has been negotiated.",
       "createdAt": "2023-02-24T09:59:18Z",
-      "updatedAt": "2023-03-06T19:33:53Z",
-      "closedAt": null,
+      "updatedAt": "2023-03-10T02:58:58Z",
+      "closedAt": "2023-03-10T02:58:58Z",
       "comments": [
         {
           "author": "qdeconinck",
@@ -4401,7 +4423,7 @@
       "id": "I_kwDOGNtpaM5fwg7P",
       "title": "Is the packet number reset if a new CID is used?",
       "url": "https://github.com/quicwg/multipath/issues/182",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "mirjak",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -4412,8 +4434,8 @@
       ],
       "body": "Based on discuss in #181 we need to clarify if the packet number is reset if the CID changes.\r\n\r\nIf only the CID changes but not the 4-tuple, the 4-tuple can be used to map to a path and packet number space.\r\n\r\nIf both changes (the client reset the CID after an idle period and on the same packet a NAT rebinding happens), I guess you can/have to try the exiting packet numbers first... however, this is anyway a case that needs more discussion.",
       "createdAt": "2023-03-02T10:38:25Z",
-      "updatedAt": "2023-03-08T06:44:11Z",
-      "closedAt": null,
+      "updatedAt": "2023-03-10T14:17:43Z",
+      "closedAt": "2023-03-10T14:17:43Z",
       "comments": [
         {
           "author": "huitema",
@@ -4582,7 +4604,7 @@
       "id": "I_kwDOGNtpaM5f5XLt",
       "title": "Provide guidance on number space and path implementation",
       "url": "https://github.com/quicwg/multipath/issues/184",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "huitema",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [
@@ -4593,9 +4615,17 @@
       ],
       "body": "It seems that some implementers are confused about the relation between an abstract path, defined by a 4-tuple, and the number spaces. We need to provide guidance.",
       "createdAt": "2023-03-03T15:51:36Z",
-      "updatedAt": "2023-03-03T23:05:25Z",
-      "closedAt": null,
-      "comments": []
+      "updatedAt": "2023-03-10T09:25:47Z",
+      "closedAt": "2023-03-10T09:25:47Z",
+      "comments": [
+        {
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Fixed by #187.",
+          "createdAt": "2023-03-10T09:25:47Z",
+          "updatedAt": "2023-03-10T09:25:47Z"
+        }
+      ]
     },
     {
       "number": 186,
@@ -4625,7 +4655,7 @@
       "labels": [],
       "body": "Taking side-discussion of #169 in its own issue.\r\n\r\n> I think we can use path ID mechanism of the current draft with the addition of the following rules to address the issues discussed in this thread:\r\n\r\n> (1) Addressing the corner case when new CID and NAT rebinding happen at the same time. When an endpoint receives a packet that has (new CID, new tuple), check if the packet is trying to initialize a new path (i.e., whether it contains a PATH_CHALLENGE). If it has PATH_CHALLENGE, try creating a new path. If it has no PATH_CHALLENGE and we don't know which path the packet is associated with (num. of paths>=2), discard the packet. If there is only one path, we perform path validation as single path QUIC does.",
       "createdAt": "2023-03-06T08:52:45Z",
-      "updatedAt": "2023-03-08T16:44:56Z",
+      "updatedAt": "2023-03-09T15:45:31Z",
       "closedAt": null,
       "comments": [
         {
@@ -4655,6 +4685,34 @@
           "body": "So the problem we initially discussed was that the two peers could end up with a different view on how many path we have. However, with the \"loose\" model we have right now, I don't think that's actually a problem.",
           "createdAt": "2023-03-08T16:42:58Z",
           "updatedAt": "2023-03-08T16:44:56Z"
+        },
+        {
+          "author": "yfmascgy",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "@huitema Maybe the earlier question was not clear. My point is that, yes we do not include additional frames when rotating CID on path, which basically aligns with what you said. However, I think when a peer wants to create a new path(with a new 4-tuple and a new CID), it needs to include a PATH_CHALLENGE in the first packet and this is what we do in the \"Example of new path establishment\". And if the receiver does not see a PATH_CHALLENGE from a packet with a completely new CID and a completely new 4-tuple, it should simply discard this packet and not enter the path creation flow.",
+          "createdAt": "2023-03-09T05:32:03Z",
+          "updatedAt": "2023-03-09T05:32:03Z"
+        },
+        {
+          "author": "huitema",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "@yfmascgy if you \"do not include additional frames when rotating CID on path\" and the NAT rebinding happens just at this time, then \"receiver does not see a PATH_CHALLENGE from a packet with a completely new CID and a completely new 4-tuple\" and will discard it. That does not seem right, unless we are a lot more specific about what we consider \"completely new\" -- if it is only a port change, is that completely new? If both port and address change but the address is in the same /24, is that completely new?\r\n\r\nWe have a parallel work on clarifying the migration issues with PR #172, which rightly states that the main issue is what happens with the old path. If the CID renewal occurs without rebinding, everything works as expected. But if the 4-tuple changes and the server does not recognize this as a renewal, the server will keep sending some packets to the old path.  As @mirjak says, the problem will fix itself when that old path is somehow closed -- but it would be better if the server abandoned the old path sooner.",
+          "createdAt": "2023-03-09T06:17:29Z",
+          "updatedAt": "2023-03-09T06:17:29Z"
+        },
+        {
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I think the only (performance) issue we have now with such event is the one where the server may still use the \"old\" path while the \"new\" one is actually the rebinding of the \"old\". We could address this by asking the client to be explicit by sending a PATH_ABANDON frame with a specific error code, but the draft would then need to define such a code.",
+          "createdAt": "2023-03-09T10:23:59Z",
+          "updatedAt": "2023-03-09T10:23:59Z"
+        },
+        {
+          "author": "huitema",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Here is what I understand so far. There are four options, all with some drawbacks:\r\n\r\n* server notices that there is no \"PATH_CHALLENGE\" in the packet, which means the client probably did not intend to create a new path. That may be a fine heuristic, but it does not tell the server which path was the old path. The server will have to do some guesswork, e.g., look for three-tuple matching (destination-IP, destination-port, source-IP), or for two-and-a-half-tuple matching (destination-IP, destination-port, prefix of source-IP). It would then do as suggested in \"NAT Rebinding\", i.e., challenge both paths and pick the one that responds.\r\n\r\n* client bundles a RETIRE_CONNECTION_ID(old CID) with the first packet after the migration. This has a major drawback: it prevents the server from sending new acknowledgements for packets received on the old path.\r\n\r\n* client bundles a PATH_ABANDON(old CID, reason = CID RETIRED) with the first packet after the migration. This creates a possible confusion, because PATH_ABANDON normally means abandon the path, not abandon the CID. We could see implementation errors.\r\n\r\n* client bundles a newly defined ABANDON_CID(old CID) frame with the first packet after the migration. The server realize that the client was merely trying to rotate the CID but that a path rebinding happened, and avoids sending new packets on the old path. \r\n\r\nThe last option is the best: indicate clearly the client intent, avoid extra traffic, avoid potential side effects. But all bundling solution have the issue that this \"first packet\" may be lost, and that the net packet will be received without the bundled data. This is probably OK since we are trying to solve a performance issue: the old path will be abandoned eventually, after idle timeout or after receiving a RETIRE_CONNECTION_ID frame. Or, if the first packet with the new CID does not include the ABANDON_CID frame, the server may fall back to the first option: notice that there is no path challenge, etc.",
+          "createdAt": "2023-03-09T15:45:31Z",
+          "updatedAt": "2023-03-09T15:45:31Z"
         }
       ]
     },
@@ -4671,6 +4729,76 @@
       "body": "The current text says that \"ACK_MP frame (defined in {{ack-mp-frame}}) SHOULD be sent on (the same) path.\"  (The exact wording will change as part of PR #185 but the meaning will be the same.) The next sentence says \"However, an ACK_MP frame can be returned via a\r\ndifferent path, based on different strategies of sending ACK_MP frames.\" \r\n\r\nThere are two issues with that. First, as stated, this text is just implementation guidance: the second sentence in fact says that ACK_MP can be sent on any path, and that nodes MUST not treat receiving an ACK_MP on a \"different\" path as an error. If this is implementation guidance, the text should move from the normative section to the implementation guidance section.\r\n\r\nSecond, I believe the guidance is wrong. I understand that the \"same path\" practice makes path RTT computation easier, but that's only one aspect of the issue, IMHO not the most dominant aspect. In QUIC, most packet losses are detected by noticing that packets sent later on the path are already acknowledged, not by waiting on timers. Sending ACK_MP on a short path will enable faster detection of packet losses by acked number holes, while sending only on the \"same\" path only improve the computation of RTT, which may or may not improve timer-based recovery. So, this is a trade-off: more precise path-RTT computation versus shorter control loop. Such tradeoff belong to implementation guidance, not the normative part.\r\n\r\nAt some point, I contributed the algorithm used in Picoquic to derive path estimates through multi-dimensional statistical analysis. OK, I get the criticism that we should not require every implementer to have a PhD in applied maths. There are of course much simpler ways to do this. Suppose a packet is sent on path X and the ACK received on path Y. The RTT will be approximately 1/2 the RTT of path X plus 1/2 the RTT of path Y. If we assume that delay variations are dominated by effects on the send path, we can apply a simple transform:\r\n\r\n1- let S be an RTT sample with data transmission on path X and ack on path Y.\r\n2- assume that S = 1/2 RTT(X) + 1/2 RTT(Y)\r\n3- derive S' = 2*S - RTT(Y)\r\n4- consider S' as an approximation of a measurement of RTT(X)\r\n5- use S' to update the smoothed RTT of path X, the RTT deviation, and the PTO.\r\n\r\nWe can discuss whether step 3 should use the smoothed RTT observed on path Y or the min RTT. Using the min RTT is probably more robust. The key here is that we can update the PTO of the path using very simple math.\r\n\r\nBut we can also wonder whether this is even needed. The PTO triggers when there is suspicion that the last packets sent to a path were lost. Effectively, the PTO triggers when \"at this time, an ACK_MP should have been received\". If ACK_MP are usually sent on the shortest path, it seems fine to just use the observed ACK delay (S in the example above) to update the PTO. The PTO will reflect both the delays and the ACK_MP sending strategy of the peer, and will fire exactly when the ACK_MP of the peer should most probably have been received.\r\n\r\nAnd of course the value could end up being wrong -- but that's not a new issue. The statistical model behind the PTO computation in RFC 9002 is an approximation (see \"no PhD\" comment), and that too is wrong some of the time. That's why RFC 9002 specifies doubling the PTO delay after each trial, and also not changing congestion parameter simply because of a first PTO expiration.\r\n\r\nBottom line: mandating ACK_MP on the same path is a tradeoff between ease of path RTT computation and efficiency of loss recovery. It should not be mandated. If we want to provide guidance, that should be in the implementation section.\r\n\r\n\r\n",
       "createdAt": "2023-03-08T19:18:02Z",
       "updatedAt": "2023-03-08T19:18:02Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 193,
+      "id": "I_kwDOGNtpaM5gY40I",
+      "title": "Clarify endpoints should ignore multipath frames referencing retired DCID sequence number",
+      "url": "https://github.com/quicwg/multipath/issues/193",
+      "state": "OPEN",
+      "author": "qdeconinck",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [
+        "editorial"
+      ],
+      "body": "We may add a sentence to clarify that we should just ignore Multipath frames related to retired DCIDs, but I would suggest to add such a sentence at the beginning of the section introducing these frames, as this applies to all of them.",
+      "createdAt": "2023-03-09T12:29:18Z",
+      "updatedAt": "2023-03-10T09:09:34Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 194,
+      "id": "I_kwDOGNtpaM5gY601",
+      "title": "Remove duplicate mention of sending PATH_ABANDON on any path is valid",
+      "url": "https://github.com/quicwg/multipath/issues/194",
+      "state": "OPEN",
+      "author": "qdeconinck",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [
+        "editorial"
+      ],
+      "body": "In 4.3.1 (Use PATH_ABANDON Frame to Close a Path), we state that\r\n\r\n> The PATH_ABANDON frame contains the Destination Connection ID Sequence Number and therefore can be sent on any path.\r\n\r\nThis is actually already said later in Section 8.2. We could remove this duplicate mention.",
+      "createdAt": "2023-03-09T12:34:03Z",
+      "updatedAt": "2023-03-09T12:34:03Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 196,
+      "id": "I_kwDOGNtpaM5gelsg",
+      "title": "Make an editorial pass in the \"New Frames\" section",
+      "url": "https://github.com/quicwg/multipath/issues/196",
+      "state": "OPEN",
+      "author": "qdeconinck",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [
+        "editorial"
+      ],
+      "body": "Just to not forget this, but this is mostly editorial.\r\n\r\n- Probably present first the ACK_MP frame, and then PATH_ABANDON and PATH_STATUS\r\n- Drop reference to I-D.liu-multipath-quic as the PATH_STATUS frame is now integrated in the draft.\r\n- Based on #183 and #190, and If we agree on #192, we could also drop the text in PATh_ABANDON stating that\r\n\r\n> PATH_ABANDON frames MAY be sent\r\non any path, not only the path on which the referenced Destination\r\nConnection ID is used.",
+      "createdAt": "2023-03-10T09:21:45Z",
+      "updatedAt": "2023-03-10T09:21:45Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 197,
+      "id": "I_kwDOGNtpaM5gemzM",
+      "title": "Does the reception of purely invalid Destination Connection ID sequence number in PATH_ABANDON/PATH_STATUS also lead to connection error?",
+      "url": "https://github.com/quicwg/multipath/issues/197",
+      "state": "OPEN",
+      "author": "qdeconinck",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Somewhat related to #193 (that moved text that was ACK_MP specific to all the multi path-specific frames), we currently state in the ACK_MP section that\r\n\r\n> If an endpoint receives an ACK_MP frame with a Connection ID sequence\r\nnumber which was never issued (i.e., with a sequence number\r\nlarger than the largest one advertised), it MUST treat this as a connection\r\nerror of type MP_PROTOCOL_VIOLATION and close the connection.\r\n\r\nShould we also react the same way with PATH_ABANDON and PATH_STATUS frames? I would say yes, but would be great to agree on this.",
+      "createdAt": "2023-03-10T09:25:07Z",
+      "updatedAt": "2023-03-10T09:25:07Z",
       "closedAt": null,
       "comments": []
     }
@@ -15317,24 +15445,26 @@
       "id": "PR_kwDOGNtpaM5Kbjcy",
       "title": "What happens when a CID is retired and no new CID is available anymore",
       "url": "https://github.com/quicwg/multipath/pull/171",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "mirjak",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "",
       "createdAt": "2023-02-21T13:33:52Z",
-      "updatedAt": "2023-03-08T17:35:39Z",
+      "updatedAt": "2023-03-10T12:23:00Z",
       "baseRepository": "quicwg/multipath",
       "baseRefName": "main",
       "baseRefOid": "9f1d4e26e1df03c0af74e8fdc1978cb6ffb25f3e",
       "headRepository": "quicwg/multipath",
       "headRefName": "mirjak-patch-15",
-      "headRefOid": "1665915b5584f30ec9fbfb3c2a3e7b836a0d7aea",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "856e09ed21aefb9de055229ffa1e4996ee8c7f30",
+      "closedAt": "2023-03-10T12:23:00Z",
+      "mergedAt": "2023-03-10T12:23:00Z",
+      "mergedBy": "qdeconinck",
+      "mergeCommit": {
+        "oid": "b167a40457ebcdb48b0b0d28c37af3a291a81932"
+      },
       "comments": [
         {
           "author": "mirjak",
@@ -15342,6 +15472,13 @@
           "body": "After author discussion: we need to also add a sentence about control frames",
           "createdAt": "2023-03-03T16:13:29Z",
           "updatedAt": "2023-03-03T16:13:29Z"
+        },
+        {
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "body": "This seems ready to merge. Plan is to merge end of tomorrow (Friday).",
+          "createdAt": "2023-03-09T11:22:06Z",
+          "updatedAt": "2023-03-09T11:22:06Z"
         }
       ],
       "reviews": [
@@ -15580,6 +15717,64 @@
               "updatedAt": "2023-03-08T17:35:21Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5PaXNZ",
+          "commit": {
+            "abbreviatedOid": "1665915"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "I think we are nearly good, I just suggest to remove a (maybe wrong) precision.",
+          "createdAt": "2023-03-09T09:12:54Z",
+          "updatedAt": "2023-03-09T09:20:22Z",
+          "comments": [
+            {
+              "originalPosition": 11,
+              "body": "```suggestion\r\nshould not use the sequence number of the retired Connection ID anymore in\r\n```",
+              "createdAt": "2023-03-09T09:12:54Z",
+              "updatedAt": "2023-03-09T09:20:22Z"
+            },
+            {
+              "originalPosition": 13,
+              "body": "```suggestion\r\na path and will therefore ignore them. This means an endpoint is also not required\r\n```",
+              "createdAt": "2023-03-09T09:15:15Z",
+              "updatedAt": "2023-03-09T09:20:22Z"
+            },
+            {
+              "originalPosition": 38,
+              "body": "Actually, the peer could still be able to send packets on the path the endpoint does not have DCID anymore. The \"over another path\" is hence not necessarily true.\r\n\r\n```suggestion\r\nby its peer, the endpoint can re-activate the path by\r\n```",
+              "createdAt": "2023-03-09T09:19:16Z",
+              "updatedAt": "2023-03-09T09:20:22Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5Pb7Cl",
+          "commit": {
+            "abbreviatedOid": "856e09e"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2023-03-09T12:35:49Z",
+          "updatedAt": "2023-03-09T12:35:49Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5PdpLy",
+          "commit": {
+            "abbreviatedOid": "856e09e"
+          },
+          "author": "huitema",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "Yes, this looks good. ",
+          "createdAt": "2023-03-09T16:00:43Z",
+          "updatedAt": "2023-03-09T16:00:43Z",
+          "comments": []
         }
       ]
     },
@@ -15588,25 +15783,35 @@
       "id": "PR_kwDOGNtpaM5Kb8XD",
       "title": "Clarifications on connection migration",
       "url": "https://github.com/quicwg/multipath/pull/172",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "mirjak",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "fixes #160\r\n\r\nAs I added this text into the implementation consideration section, I on purpose did not use normative language. However, we might want to double check that the normative language we used elsewhere in the document is covering this appropriately.",
       "createdAt": "2023-02-21T14:46:54Z",
-      "updatedAt": "2023-03-08T21:30:43Z",
+      "updatedAt": "2023-03-10T14:16:43Z",
       "baseRepository": "quicwg/multipath",
       "baseRefName": "main",
       "baseRefOid": "9f1d4e26e1df03c0af74e8fdc1978cb6ffb25f3e",
       "headRepository": "quicwg/multipath",
       "headRefName": "mirjak-patch-16",
-      "headRefOid": "2617e1a71075782929ee5954473444687dbfb58d",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
-      "comments": [],
+      "headRefOid": "766a7dd2c5917d13e275cab1515174d2e3765225",
+      "closedAt": "2023-03-10T14:16:43Z",
+      "mergedAt": "2023-03-10T14:16:43Z",
+      "mergedBy": "qdeconinck",
+      "mergeCommit": {
+        "oid": "16584b2d63a0d867cf8efd6d5f768f1a18138363"
+      },
+      "comments": [
+        {
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "body": "The current text is ready to merge. There is a remaining question about proposed additional text. If we don't conclude until end of tomorrow (Friday), we will merge as is (without the addition) and create a new PR/issue for that addition instead.",
+          "createdAt": "2023-03-09T11:28:02Z",
+          "updatedAt": "2023-03-09T11:28:02Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOGNtpaM5OcD4R",
@@ -16082,6 +16287,225 @@
               "updatedAt": "2023-03-08T21:30:43Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5PYt7p",
+          "commit": {
+            "abbreviatedOid": "2617e1a"
+          },
+          "author": "huitema",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-09T02:08:06Z",
+          "updatedAt": "2023-03-09T02:08:07Z",
+          "comments": [
+            {
+              "originalPosition": 43,
+              "body": "I think overloading the meaning of PATH_CHALLENGE is a bad idea, see comments on #188. But sending a \"RETIRE_CONNECTION_ID\" too soon is also a bad idea, because the peer needs some time to send acknowledgements. Maybe the peer doing the CID renewal could send PATH_ABANDON(old_path, reason_code = CID_replaced), with a clear statement explaining that the 4-tuple is still valid, but the CID is not?",
+              "createdAt": "2023-03-09T02:08:06Z",
+              "updatedAt": "2023-03-09T02:08:07Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5Paiw5",
+          "commit": {
+            "abbreviatedOid": "2617e1a"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-09T09:39:48Z",
+          "updatedAt": "2023-03-09T09:39:49Z",
+          "comments": [
+            {
+              "originalPosition": 43,
+              "body": "I really like this idea of the PATH_ABANDON with a specific reason_code, but given we need to define such a reason_code, it should deserve its own issue and PR.",
+              "createdAt": "2023-03-09T09:39:48Z",
+              "updatedAt": "2023-03-09T09:39:49Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5PakgX",
+          "commit": {
+            "abbreviatedOid": "2617e1a"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "Two comments, but then I think the text will be ready.",
+          "createdAt": "2023-03-09T09:43:52Z",
+          "updatedAt": "2023-03-09T09:49:47Z",
+          "comments": [
+            {
+              "originalPosition": 20,
+              "body": "Given that we give implementation considerations, we should not restrict the behaviour too much IMHO.\r\n\r\n```suggestion\r\nthe endpoint can keep the same congestion control and RTT measurement state.\r\n```",
+              "createdAt": "2023-03-09T09:43:52Z",
+              "updatedAt": "2023-03-09T09:49:47Z"
+            },
+            {
+              "originalPosition": 28,
+              "body": "Why not simply refers to that section directly, that also states that servers may keep their current state if they suspect the event to be a NAT rebinding?\r\n```suggestion\r\nIf the path validation process succeeds, the endpoint\r\nfollows considerations of {{Section 9.4 of QUIC-TRANSPORT}}.\r\n```",
+              "createdAt": "2023-03-09T09:47:29Z",
+              "updatedAt": "2023-03-09T09:49:48Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5PbT7Z",
+          "commit": {
+            "abbreviatedOid": "2617e1a"
+          },
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-09T11:23:57Z",
+          "updatedAt": "2023-03-09T11:23:58Z",
+          "comments": [
+            {
+              "originalPosition": 28,
+              "body": "I would prefer to keep this because I find it annoying to provide a vague reference without giving an indication what this reference is for. Why do you think the current text is not good?  ",
+              "createdAt": "2023-03-09T11:23:57Z",
+              "updatedAt": "2023-03-09T11:23:58Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5PbVJW",
+          "commit": {
+            "abbreviatedOid": "2617e1a"
+          },
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-09T11:26:12Z",
+          "updatedAt": "2023-03-09T11:26:12Z",
+          "comments": [
+            {
+              "originalPosition": 43,
+              "body": "Let's open an issue to add a reason code, or a replaced by field, or both. Maybe we should also rename path_abandon to cid_abandon?\r\n\r\nQuestion is should we merge this text for now or also open a new issue instead? I think we can merge because it shouldn't hurt to send a path_abandon frame, right?",
+              "createdAt": "2023-03-09T11:26:12Z",
+              "updatedAt": "2023-03-09T11:26:12Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5Pb-Xk",
+          "commit": {
+            "abbreviatedOid": "2617e1a"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-09T12:44:34Z",
+          "updatedAt": "2023-03-09T12:44:34Z",
+          "comments": [
+            {
+              "originalPosition": 28,
+              "body": "Because it somewhat contradicts what Section 9.4 states.\r\n\r\n> On confirming a peer's ownership of its new address, an endpoint MUST immediately reset the congestion controller and round-trip time estimator for the new path to initial values (see Appendices [A.3](https://www.rfc-editor.org/rfc/rfc9002#appendix-A.3) and [B.3](https://www.rfc-editor.org/rfc/rfc9002#appendix-B.3) of [[QUIC-RECOVERY](https://www.rfc-editor.org/rfc/rfc9000.html#QUIC-RECOVERY)]) unless the only change in the peer's address is its port number. Because port-only changes are commonly the result of NAT rebinding or other middlebox activity, the endpoint MAY instead retain its congestion control state and round-trip estimate in those cases instead of reverting to initial values.\r\n\r\nWe could just adapt the text to be like \"the endpoint updates the path's congestion controller and round-trip time estimator according to {{Section 9.4 of QUIC-TRANSPORT}}\".",
+              "createdAt": "2023-03-09T12:44:34Z",
+              "updatedAt": "2023-03-09T12:44:34Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5Pb-pi",
+          "commit": {
+            "abbreviatedOid": "2617e1a"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-09T12:45:20Z",
+          "updatedAt": "2023-03-09T12:45:21Z",
+          "comments": [
+            {
+              "originalPosition": 43,
+              "body": "I think this issue is somewhat orthogonal, and discussed in #188.",
+              "createdAt": "2023-03-09T12:45:21Z",
+              "updatedAt": "2023-03-09T12:45:21Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5PdiOZ",
+          "commit": {
+            "abbreviatedOid": "2617e1a"
+          },
+          "author": "huitema",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-09T15:47:51Z",
+          "updatedAt": "2023-03-09T15:47:51Z",
+          "comments": [
+            {
+              "originalPosition": 43,
+              "body": "We do have an issue with the server continuing sending data on the old path, now a dead end. I am concerned that we will not have an agreement before Monday. I left comments in issue #188. If we resolve that issue before Friday 3/10, let's incorporate the agreed solution in this PR. If we do not, let's check in the PR as is, without the extra text.",
+              "createdAt": "2023-03-09T15:47:51Z",
+              "updatedAt": "2023-03-09T15:47:51Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5PkYVj",
+          "commit": {
+            "abbreviatedOid": "2617e1a"
+          },
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-10T14:12:29Z",
+          "updatedAt": "2023-03-10T14:12:30Z",
+          "comments": [
+            {
+              "originalPosition": 28,
+              "body": "```suggestion\r\nIf path validation process succeeds, the endpoints set\r\nthe path's congestion controller and round-trip time\r\nestimator according to {{Section 9.4 of QUIC-TRANSPORT}}.\r\n```",
+              "createdAt": "2023-03-10T14:12:29Z",
+              "updatedAt": "2023-03-10T14:12:30Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5PkYzv",
+          "commit": {
+            "abbreviatedOid": "766a7dd"
+          },
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-10T14:13:41Z",
+          "updatedAt": "2023-03-10T14:13:42Z",
+          "comments": [
+            {
+              "originalPosition": 43,
+              "body": "Okay, I will put this into a separate PR and we can keep working there!",
+              "createdAt": "2023-03-10T14:13:41Z",
+              "updatedAt": "2023-03-10T14:13:42Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5PkZlp",
+          "commit": {
+            "abbreviatedOid": "766a7dd"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2023-03-10T14:15:37Z",
+          "updatedAt": "2023-03-10T14:15:37Z",
+          "comments": []
         }
       ]
     },
@@ -16097,13 +16521,13 @@
       "labels": [],
       "body": "The current text says that one has to wait for a the retire frame or 3 PTOs. However (as also indicated in the states figure) this should be at least 3 PTOs. This PR fixes this inconsistency. Further is add a reference to the definition to PTO and replaces RTO with PTO where the wrong term is used. I believe all these fixes address straightforward mistakes, however, if discussion is needed, we can of course also open an issue.",
       "createdAt": "2023-02-21T15:03:53Z",
-      "updatedAt": "2023-03-08T18:20:01Z",
+      "updatedAt": "2023-03-11T07:14:00Z",
       "baseRepository": "quicwg/multipath",
       "baseRefName": "main",
-      "baseRefOid": "9f1d4e26e1df03c0af74e8fdc1978cb6ffb25f3e",
+      "baseRefOid": "b320d91fb15cb7f9551d2fa606f9af23ab5089f1",
       "headRepository": "quicwg/multipath",
       "headRefName": "mirjak-patch-17",
-      "headRefOid": "13f001452cb27e767a81c3aa92b59e6d07c3970b",
+      "headRefOid": "cff43257c39d074829532b096671cf9ba13d07af",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -16377,9 +16801,9 @@
           "comments": [
             {
               "originalPosition": 47,
-              "body": "This is a new normative requirement now but I think this is what is actually meant by \"releasing resources\". Particularly you should only retire you CID if you are sure you don't need it anymore. Hence the new normative requirement is to wait 3 PTOs before you sent the retired CID frame after receiving the abandon frame. ",
+              "body": "This is a new normative requirement now but I think this is what is actually meant by \"releasing resources\". Particularly you should only retire your CID if you are sure you don't need it anymore. Hence the new normative requirement is to wait 3 PTOs before you sent the retired CID frame after receiving the abandon frame. ",
               "createdAt": "2023-03-08T18:18:55Z",
-              "updatedAt": "2023-03-08T18:18:56Z"
+              "updatedAt": "2023-03-09T11:29:41Z"
             }
           ]
         },
@@ -16400,6 +16824,211 @@
               "body": "I didn't change this first sentence because that already covered in PR #185 (which we should probably merge first)",
               "createdAt": "2023-03-08T18:19:33Z",
               "updatedAt": "2023-03-08T18:19:34Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5PaeQP",
+          "commit": {
+            "abbreviatedOid": "13f0014"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-09T09:29:17Z",
+          "updatedAt": "2023-03-09T09:29:17Z",
+          "comments": [
+            {
+              "originalPosition": 32,
+              "body": "Agree.",
+              "createdAt": "2023-03-09T09:29:17Z",
+              "updatedAt": "2023-03-09T09:29:17Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5PahLE",
+          "commit": {
+            "abbreviatedOid": "13f0014"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "Text is fine, but we should merge #185 before this one IMHO.",
+          "createdAt": "2023-03-09T09:36:06Z",
+          "updatedAt": "2023-03-09T09:37:35Z",
+          "comments": [
+            {
+              "originalPosition": 60,
+              "body": "The RETIRE_CONNECTION_ID frame is not an indication, it is stronger.\r\n```suggestion\r\nthat the sender will not send any packets associated to the\r\n```",
+              "createdAt": "2023-03-09T09:36:06Z",
+              "updatedAt": "2023-03-09T09:37:35Z"
+            },
+            {
+              "originalPosition": 62,
+              "body": "```suggestion\r\nThe receiver of a PATH_ABANDON frame MAY also send\r\n```",
+              "createdAt": "2023-03-09T09:36:19Z",
+              "updatedAt": "2023-03-09T09:37:35Z"
+            },
+            {
+              "originalPosition": 63,
+              "body": "```suggestion\r\na PATH_ABANDON frame to indicate its own unwillingness to receive\r\n```",
+              "createdAt": "2023-03-09T09:36:32Z",
+              "updatedAt": "2023-03-09T09:37:35Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5PbWz6",
+          "commit": {
+            "abbreviatedOid": "13f0014"
+          },
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-09T11:29:06Z",
+          "updatedAt": "2023-03-09T11:29:07Z",
+          "comments": [
+            {
+              "originalPosition": 28,
+              "body": "```suggestion\r\n```",
+              "createdAt": "2023-03-09T11:29:07Z",
+              "updatedAt": "2023-03-09T11:29:07Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5PbW8C",
+          "commit": {
+            "abbreviatedOid": "13f0014"
+          },
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-09T11:29:20Z",
+          "updatedAt": "2023-03-09T11:29:20Z",
+          "comments": [
+            {
+              "originalPosition": 32,
+              "body": "```suggestion\r\n```",
+              "createdAt": "2023-03-09T11:29:20Z",
+              "updatedAt": "2023-03-09T11:29:20Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5PbXir",
+          "commit": {
+            "abbreviatedOid": "13f0014"
+          },
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-09T11:30:22Z",
+          "updatedAt": "2023-03-09T11:30:22Z",
+          "comments": [
+            {
+              "originalPosition": 60,
+              "body": "agreed",
+              "createdAt": "2023-03-09T11:30:22Z",
+              "updatedAt": "2023-03-09T11:30:23Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5PdlhJ",
+          "commit": {
+            "abbreviatedOid": "881d5cb"
+          },
+          "author": "huitema",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "Looks good.",
+          "createdAt": "2023-03-09T15:53:50Z",
+          "updatedAt": "2023-03-09T15:54:50Z",
+          "comments": [
+            {
+              "originalPosition": 47,
+              "body": "Yes, this is good. There are two big motivations: packets may be delivered out of order, with packets in transit arriving after the PATH_ABANDON; and, acknowledgements still need to be sent. Waiting 3 PTO is the standard mitigation for such issues.",
+              "createdAt": "2023-03-09T15:53:50Z",
+              "updatedAt": "2023-03-09T15:54:50Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5PiVZZ",
+          "commit": {
+            "abbreviatedOid": "cff4325"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "By fixing the conflict, I also fixed #194.",
+          "createdAt": "2023-03-10T08:56:14Z",
+          "updatedAt": "2023-03-10T08:56:14Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5PnyoT",
+          "commit": {
+            "abbreviatedOid": "483499a"
+          },
+          "author": "huitema",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-11T07:02:57Z",
+          "updatedAt": "2023-03-11T07:02:57Z",
+          "comments": [
+            {
+              "originalPosition": 23,
+              "body": "The question about \"what to do with packets where DCID is retired\" is not specific to multipath. The same \"out of order delivery issues\" could happen with QUIC as well. After a CID is retired, we expect the issuer of the CID to \"forget about it\". If that CID is forgotten, the load balancer or the QUIC server will not be able to associate it with a QUIC connection context. The QUIC connection will never have to process these packets.\r\n\r\nThe QUIC server will assume that the client is trying to use a connection that does not exist anymore and could issue a \"stateless reset\" packet, but since the CID has been retired the token in the stateless reset will not match any valid CID for the connection and will have no effect.\r\n\r\nWhich is a long winded way to say that packets arriving after the DCID has been retired will be automatically ignored. There is no need to specify a processing for them, because they will never be processed at all.",
+              "createdAt": "2023-03-11T07:02:57Z",
+              "updatedAt": "2023-03-11T07:02:58Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5Pnyzu",
+          "commit": {
+            "abbreviatedOid": "cff4325"
+          },
+          "author": "huitema",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-11T07:12:23Z",
+          "updatedAt": "2023-03-11T07:12:24Z",
+          "comments": [
+            {
+              "originalPosition": 38,
+              "body": "~~~suggestion\r\nThe sender and the receiver of a PATH_ABANDON frame should not release their resources\r\n~~~",
+              "createdAt": "2023-03-11T07:12:23Z",
+              "updatedAt": "2023-03-11T07:12:24Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5Pny2C",
+          "commit": {
+            "abbreviatedOid": "cff4325"
+          },
+          "author": "huitema",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-11T07:13:59Z",
+          "updatedAt": "2023-03-11T07:14:00Z",
+          "comments": [
+            {
+              "originalPosition": 47,
+              "body": "The suggestion above should address the point raised by @Yanmei-Liu in the resolved conversation below.",
+              "createdAt": "2023-03-11T07:13:59Z",
+              "updatedAt": "2023-03-11T07:14:00Z"
             }
           ]
         }
@@ -16649,25 +17278,35 @@
       "id": "PR_kwDOGNtpaM5LPuLi",
       "title": "Remove mentions of the \"Path Identifier\"",
       "url": "https://github.com/quicwg/multipath/pull/185",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "qdeconinck",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "In lot of places in the draft, we mention the \"Path Identifier\", which we define as the Destination Connection ID sequence number used over that path. It seems that maintaining the notion of \"Path Identifier\" causes a lot of confusion, so better keep things simple and mention CID sequence numbers directly.\r\n\r\nNote that this implies that the related fields in\r\nmultipath-specific have been renamed to their \"explicit\" form. Some of these names are maybe a bit long, so we may shorten them if this does not introduce ambiguity.\r\n\r\nFix #169. Rewriting related section may also answer #181.",
       "createdAt": "2023-03-03T17:25:53Z",
-      "updatedAt": "2023-03-08T21:05:38Z",
+      "updatedAt": "2023-03-10T02:58:56Z",
       "baseRepository": "quicwg/multipath",
       "baseRefName": "main",
       "baseRefOid": "6e279069cf117af0b6bee17d0248ba726ed4bbbe",
       "headRepository": "quicwg/multipath",
       "headRefName": "remove-path-id",
-      "headRefOid": "0db9fbbb56bc2be4994849a59ca97fb6b9065609",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
-      "comments": [],
+      "headRefOid": "6ff005d3b228775dd0ee7c72a3c7569c832c0156",
+      "closedAt": "2023-03-10T02:58:56Z",
+      "mergedAt": "2023-03-10T02:58:56Z",
+      "mergedBy": "Yanmei-Liu",
+      "mergeCommit": {
+        "oid": "a15f4084bf20485846152ac836a5516cf91a28ac"
+      },
+      "comments": [
+        {
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I think this PR is ready to merge. Let's wait until end of today to give others another change to review. However would be good to merge to, as we need to merge this one before we can merge the others!",
+          "createdAt": "2023-03-09T11:19:42Z",
+          "updatedAt": "2023-03-09T11:19:42Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOGNtpaM5PESf5",
@@ -17566,6 +18205,159 @@
               "updatedAt": "2023-03-08T19:28:40Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5PaHN2",
+          "commit": {
+            "abbreviatedOid": "0db9fbb"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-09T08:35:03Z",
+          "updatedAt": "2023-03-09T08:35:03Z",
+          "comments": [
+            {
+              "originalPosition": 299,
+              "body": "Not yet. We may add a sentence to clarify that we should just ignore Multipath frames related to retired DCIDs, but I would suggest to add such a sentence at the beginning of the section introducing these frames, as this applies to all of them.",
+              "createdAt": "2023-03-09T08:35:03Z",
+              "updatedAt": "2023-03-09T08:35:03Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5PaVnj",
+          "commit": {
+            "abbreviatedOid": "0db9fbb"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-09T09:09:05Z",
+          "updatedAt": "2023-03-09T09:09:05Z",
+          "comments": [
+            {
+              "originalPosition": 67,
+              "body": "Let's fix that in another PR then.",
+              "createdAt": "2023-03-09T09:09:05Z",
+              "updatedAt": "2023-03-09T09:09:06Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5PaWgu",
+          "commit": {
+            "abbreviatedOid": "f8d13a0"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-09T09:11:12Z",
+          "updatedAt": "2023-03-09T09:11:13Z",
+          "comments": [
+            {
+              "originalPosition": 22,
+              "body": "Alright, let's remove this definition and just add a note that when we say \"path\", it's the same as a \"network path\" in RFC9000.",
+              "createdAt": "2023-03-09T09:11:12Z",
+              "updatedAt": "2023-03-09T09:11:13Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5PbRnD",
+          "commit": {
+            "abbreviatedOid": "6ff005d"
+          },
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-09T11:17:20Z",
+          "updatedAt": "2023-03-09T11:17:20Z",
+          "comments": [
+            {
+              "originalPosition": 299,
+              "body": "Okay, maybe let's open an issue, so we don't forget!",
+              "createdAt": "2023-03-09T11:17:20Z",
+              "updatedAt": "2023-03-09T11:17:20Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5PbR9v",
+          "commit": {
+            "abbreviatedOid": "6ff005d"
+          },
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-09T11:18:19Z",
+          "updatedAt": "2023-03-09T11:18:19Z",
+          "comments": [
+            {
+              "originalPosition": 67,
+              "body": "Okay, should we open an (editorial) issue, so we don't forget? Or we can create a new PR right after this one is merged (without an issue).",
+              "createdAt": "2023-03-09T11:18:19Z",
+              "updatedAt": "2023-03-09T11:18:19Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5Pb4xm",
+          "commit": {
+            "abbreviatedOid": "7a9c103"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-09T12:29:29Z",
+          "updatedAt": "2023-03-09T12:29:30Z",
+          "comments": [
+            {
+              "originalPosition": 299,
+              "body": "Filled #193.",
+              "createdAt": "2023-03-09T12:29:29Z",
+              "updatedAt": "2023-03-09T12:29:30Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5Pb6jA",
+          "commit": {
+            "abbreviatedOid": "0db9fbb"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-09T12:34:27Z",
+          "updatedAt": "2023-03-09T12:34:27Z",
+          "comments": [
+            {
+              "originalPosition": 67,
+              "body": "Filled #194.",
+              "createdAt": "2023-03-09T12:34:27Z",
+              "updatedAt": "2023-03-09T12:34:27Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5PhL4q",
+          "commit": {
+            "abbreviatedOid": "6ff005d"
+          },
+          "author": "Yanmei-Liu",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "Looks good to me. ",
+          "createdAt": "2023-03-10T02:58:33Z",
+          "updatedAt": "2023-03-10T02:58:33Z",
+          "comments": []
         }
       ]
     },
@@ -17574,24 +18366,26 @@
       "id": "PR_kwDOGNtpaM5LVML7",
       "title": "Explain number spaces",
       "url": "https://github.com/quicwg/multipath/pull/187",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "huitema",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "This explanation of how to implement number spaces addresses issue #184.",
       "createdAt": "2023-03-06T05:38:04Z",
-      "updatedAt": "2023-03-06T15:16:27Z",
+      "updatedAt": "2023-03-10T08:40:06Z",
       "baseRepository": "quicwg/multipath",
       "baseRefName": "main",
       "baseRefOid": "6e279069cf117af0b6bee17d0248ba726ed4bbbe",
       "headRepository": "huitema/multipath",
       "headRefName": "explain-numbers",
-      "headRefOid": "f0a3dd83b2b146e2155d426eeb2aee1cd6250f54",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "0b55b332adc9aec408102c88cd6166d1b4b954be",
+      "closedAt": "2023-03-10T08:40:05Z",
+      "mergedAt": "2023-03-10T08:40:05Z",
+      "mergedBy": "qdeconinck",
+      "mergeCommit": {
+        "oid": "b320d91fb15cb7f9551d2fa606f9af23ab5089f1"
+      },
       "comments": [
         {
           "author": "qdeconinck",
@@ -17599,6 +18393,20 @@
           "body": "Note that I still have some diffs when running `make fix-lint`.",
           "createdAt": "2023-03-06T09:14:25Z",
           "updatedAt": "2023-03-06T09:14:25Z"
+        },
+        {
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I think this text is fine and is ready to merge.\r\n\r\nHowever, I still have one question: what's about loss detection? if you only change the CID but not the 4-tuple/path, you don't reset congestion control but as you reset your packet number space this might make loss detection more complicated. Do we need to provide some implementation guidance about this?\r\n\r\nWe can just merge this now and I can open an issue. Or there is anything we can/should add right now to this PR?",
+          "createdAt": "2023-03-09T19:44:47Z",
+          "updatedAt": "2023-03-09T19:44:47Z"
+        },
+        {
+          "author": "huitema",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "@mirjak I am a bit concerned that developing how and when variables like the RTT are updated will at best replicates the prescriptive text in the previous section, or worse conflicts with it. If we say anything, it will have to be \"the processing and update of the per path variables is specified in section so and so\", but I am not sure that helps. I would rather check in as is.\r\n\r\nOf course, there is also a longer answer. If the path did not change, the acknowledgement based loss detection (section 6.1 of RFC 9002) could take into account not just the number of \"posterior\" packets acknowledged with that old CID, but also the number of packets acknowledged in the \"new\" number space. That seems logical, but it implies that the acks for the \"old\" CID are not sent later than the acks for the \"new\" CID. This depends on implementation choices, and thus may not be reliable. We could have a discussion.\r\n\r\nSo yes, leave it as is.",
+          "createdAt": "2023-03-10T00:25:21Z",
+          "updatedAt": "2023-03-10T00:25:21Z"
         }
       ],
       "reviews": [
@@ -17809,6 +18617,26 @@
               "updatedAt": "2023-03-06T15:04:37Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5PiOqK",
+          "commit": {
+            "abbreviatedOid": "f0a3dd8"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-10T08:38:04Z",
+          "updatedAt": "2023-03-10T08:38:04Z",
+          "comments": [
+            {
+              "originalPosition": 10,
+              "body": "Just adding markdown reference for RFC 9000, purely editorial.\r\n\r\n```suggestion\r\n{{QUIC-TRANSPORT}}, which only have to manage three number spaces for Initial,\r\n```",
+              "createdAt": "2023-03-10T08:38:04Z",
+              "updatedAt": "2023-03-10T08:38:04Z"
+            }
+          ]
         }
       ]
     },
@@ -17817,24 +18645,26 @@
       "id": "PR_kwDOGNtpaM5LiyI1",
       "title": "Add descriptions on resetting packet number  when a new CID is used",
       "url": "https://github.com/quicwg/multipath/pull/189",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "yfmascgy",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "A new sentence is added to clarify that when a new CID is used, packet number space's largest_ack should be reset to None for the packet number encoding algorithm specified in RFC9000.",
       "createdAt": "2023-03-08T06:42:42Z",
-      "updatedAt": "2023-03-08T16:23:12Z",
+      "updatedAt": "2023-03-10T14:17:42Z",
       "baseRepository": "quicwg/multipath",
       "baseRefName": "main",
       "baseRefOid": "6e279069cf117af0b6bee17d0248ba726ed4bbbe",
       "headRepository": "yfmascgy/multipath",
       "headRefName": "dev/pn_reset",
-      "headRefOid": "aa43957a07e5665e73ee07fd47d7d2d485dc340b",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "efd08d26fc6cf408ff610f63ca26d9a6b76f4eeb",
+      "closedAt": "2023-03-10T14:17:42Z",
+      "mergedAt": "2023-03-10T14:17:42Z",
+      "mergedBy": "mirjak",
+      "mergeCommit": {
+        "oid": "1cf75916dd74fe81c5f2db5f8f617d3479f2a556"
+      },
       "comments": [],
       "reviews": [
         {
@@ -17920,6 +18750,441 @@
               "body": "@mirjak For the changing CID, I suggest to adapt the text in #172 (basically, if you change the CID on a path, you can keep your path's congestion control state and RTT measurements).",
               "createdAt": "2023-03-08T16:23:11Z",
               "updatedAt": "2023-03-08T16:23:12Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5PZXW-",
+          "commit": {
+            "abbreviatedOid": "aa43957"
+          },
+          "author": "yfmascgy",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-09T05:44:38Z",
+          "updatedAt": "2023-03-09T05:44:38Z",
+          "comments": [
+            {
+              "originalPosition": 9,
+              "body": "Yeah, my bad. The word \"reset\" has problems. I will adopt Quentin's suggestions.",
+              "createdAt": "2023-03-09T05:44:38Z",
+              "updatedAt": "2023-03-09T05:44:38Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5Pax_j",
+          "commit": {
+            "abbreviatedOid": "efd08d2"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2023-03-09T10:15:05Z",
+          "updatedAt": "2023-03-09T10:15:05Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5PkaUu",
+          "commit": {
+            "abbreviatedOid": "efd08d2"
+          },
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2023-03-10T14:17:27Z",
+          "updatedAt": "2023-03-10T14:17:27Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 191,
+      "id": "PR_kwDOGNtpaM5Loor1",
+      "title": "Add retire_cid in path status figure in section 4.4",
+      "url": "https://github.com/quicwg/multipath/pull/191",
+      "state": "OPEN",
+      "author": "yfmascgy",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2023-03-09T06:00:29Z",
+      "updatedAt": "2023-03-10T14:44:26Z",
+      "baseRepository": "quicwg/multipath",
+      "baseRefName": "main",
+      "baseRefOid": "6e279069cf117af0b6bee17d0248ba726ed4bbbe",
+      "headRepository": "yfmascgy/multipath",
+      "headRefName": "dev/refine_fig_4_4",
+      "headRefOid": "eea0461f8d7e71eabd398aa5c7661308709594d0",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGNtpaM5PazFO",
+          "commit": {
+            "abbreviatedOid": "eea0461"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-09T10:17:46Z",
+          "updatedAt": "2023-03-09T10:17:53Z",
+          "comments": [
+            {
+              "originalPosition": 4,
+              "body": "Why would receiving a RETIRE_CONNECTION_ID would close the path? It does not prevent sending on that path with your own DCID (which is different from the CID being retired).\r\n```suggestion\r\n       | RETIRE_CONNECTION_ID sent               |\r\n```",
+              "createdAt": "2023-03-09T10:17:46Z",
+              "updatedAt": "2023-03-09T10:17:53Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5PkmCD",
+          "commit": {
+            "abbreviatedOid": "eea0461"
+          },
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-10T14:44:26Z",
+          "updatedAt": "2023-03-10T14:44:26Z",
+          "comments": [
+            {
+              "originalPosition": 4,
+              "body": "We just updated the text, do we need to update this as well. I guess you actually go into \"closed\" if we have both, received an retired CID farm and send your as well, or 3 PTOs after the abandon was sent.",
+              "createdAt": "2023-03-10T14:44:26Z",
+              "updatedAt": "2023-03-10T14:44:26Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 192,
+      "id": "PR_kwDOGNtpaM5LqKOS",
+      "title": "update scheduling guidances",
+      "url": "https://github.com/quicwg/multipath/pull/192",
+      "state": "OPEN",
+      "author": "qdeconinck",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Let's give the facts to the implementers, without providing too specific guidance neither.\r\n\r\nFix #183 and may also address #190.",
+      "createdAt": "2023-03-09T10:41:32Z",
+      "updatedAt": "2023-03-10T18:09:08Z",
+      "baseRepository": "quicwg/multipath",
+      "baseRefName": "main",
+      "baseRefOid": "6e279069cf117af0b6bee17d0248ba726ed4bbbe",
+      "headRepository": "quicwg/multipath",
+      "headRefName": "scheduling",
+      "headRefOid": "9af24cad6c4e1ec330e27a910fe44f4a271271c4",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGNtpaM5PbAzu",
+          "commit": {
+            "abbreviatedOid": "40a745a"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-09T10:44:15Z",
+          "updatedAt": "2023-03-09T10:44:16Z",
+          "comments": [
+            {
+              "originalPosition": 36,
+              "body": "Note that this text may supersede the one in Section 5.1:\r\n\r\n> ACK_MP frame (defined in [Section 8.3](https://quicwg.org/multipath/draft-ietf-quic-multipath.html#ack-mp-frame)) SHOULD be sent on the same path as identified by the Path Identifier. However, an ACK_MP frame can be returned via a different path, based on different strategies of sending ACK_MP frames.",
+              "createdAt": "2023-03-09T10:44:15Z",
+              "updatedAt": "2023-03-09T10:44:16Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5Pkjrj",
+          "commit": {
+            "abbreviatedOid": "40a745a"
+          },
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-10T14:39:25Z",
+          "updatedAt": "2023-03-10T14:39:29Z",
+          "comments": [
+            {
+              "originalPosition": 36,
+              "body": "This is fine to have effect of this scheduling explained a bit more here but leave the normative things in other sections.\r\n\r\nHowever, you  removed a lot of text now. I think we should keep mentioning two things:\r\n\r\n1) if not ACK as sent over the sama path that can/will impact RTT estimation negatively.\r\n\r\n2) I found it catalo useful to provide a reference to {{I-D.bonaventure-iccrg-schedulers}} ",
+              "createdAt": "2023-03-10T14:39:25Z",
+              "updatedAt": "2023-03-10T14:39:29Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5Pk2Gx",
+          "commit": {
+            "abbreviatedOid": "40a745a"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-10T15:15:51Z",
+          "updatedAt": "2023-03-10T15:15:52Z",
+          "comments": [
+            {
+              "originalPosition": 36,
+              "body": "For the normative text, I was actually proposing to remove the text about endpoints that SHOULD send ACK_MP on the same path. But this would not be part of this PR.\r\n\r\nRegarding your first point, I'm not sure sending no ACK at all on the same path necessarily impact RTT estimation in a bad way. As long as you keep consistency in sending your ACKs, this should not be a big issue. Also note that with network paths having asymmetrical characteristics in forward or backward directions, it might be desirable from a performance viewpoint to send ACKs on some specific paths. See also #190. My main point is that we should not rely on specific scheduling from the peer to make Multipath QUIC work.\r\n\r\nRegarding your second point, I'm not against keeping the reference. However, this other draft is not adopted (and currently expired), not sure how this would be a problem in the publication process.",
+              "createdAt": "2023-03-10T15:15:51Z",
+              "updatedAt": "2023-03-10T15:15:52Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5Plcri",
+          "commit": {
+            "abbreviatedOid": "40a745a"
+          },
+          "author": "huitema",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "Looks good, but the description of congestion is imprecise. Either drop it or fix it.",
+          "createdAt": "2023-03-10T16:44:01Z",
+          "updatedAt": "2023-03-10T16:48:35Z",
+          "comments": [
+            {
+              "originalPosition": 7,
+              "body": "Can we say this a little better? ACK frames, for example, are not subject to the congestion control. The proper statement would be:\r\n~~~suggestion\r\nQUIC packets that increase the number of bytes in flight can only be sent when the congestion window is open.\r\n~~~\r\nBut that's a bit tautological. One could just drop the whole sentence, because that's exactly what the word \"regulated\" above means.\r\n",
+              "createdAt": "2023-03-10T16:44:01Z",
+              "updatedAt": "2023-03-10T16:48:35Z"
+            },
+            {
+              "originalPosition": 36,
+              "body": "I agree with the proposal. It does remove text, but less text is better. And it says exactly what we want, i.e., scheduling of packets is up to the implementation.\r\n\r\nIn particular, I like the removal of the reference to time stamps. The draft is expiring, and despite efforts nobody is picking it up. Rather not have a reference to an expired draft in a proposed standard.",
+              "createdAt": "2023-03-10T16:47:30Z",
+              "updatedAt": "2023-03-10T16:48:35Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5Pl2Pi",
+          "commit": {
+            "abbreviatedOid": "40a745a"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-10T17:39:08Z",
+          "updatedAt": "2023-03-10T17:39:09Z",
+          "comments": [
+            {
+              "originalPosition": 7,
+              "body": "You're right. Your suggestion above is good (committing now). But yeah, this sentence may not be necessary in the end...",
+              "createdAt": "2023-03-10T17:39:08Z",
+              "updatedAt": "2023-03-10T17:39:09Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5PmB9m",
+          "commit": {
+            "abbreviatedOid": "9af24ca"
+          },
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-10T18:05:30Z",
+          "updatedAt": "2023-03-10T18:05:31Z",
+          "comments": [
+            {
+              "originalPosition": 8,
+              "body": "```suggestion\r\nscheme. QUIC packets that increase the number of bytes in flight can only be sent\r\nwhen the congestion window allows it.\r\n```",
+              "createdAt": "2023-03-10T18:05:30Z",
+              "updatedAt": "2023-03-10T18:05:31Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5PmDAw",
+          "commit": {
+            "abbreviatedOid": "9af24ca"
+          },
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-10T18:09:07Z",
+          "updatedAt": "2023-03-10T18:09:08Z",
+          "comments": [
+            {
+              "originalPosition": 36,
+              "body": "Okay to not say much about RTT estimates now. We can revisit that later if anything needed. Might be good to review the text we have about RTT estimation first.\r\n\r\nAbout the reference, having a reference to an individual draft or even expired draft is no problem as long as it is informational. However, maybe we have a nice research paper we can refer instead? I can try to find something but @qdeconinck I'm sure you also have a good overview.",
+              "createdAt": "2023-03-10T18:09:07Z",
+              "updatedAt": "2023-03-10T18:09:08Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 195,
+      "id": "PR_kwDOGNtpaM5Lv5yY",
+      "title": "ignore multipath-specific frames with too old DCID sequence number",
+      "url": "https://github.com/quicwg/multipath/pull/195",
+      "state": "OPEN",
+      "author": "qdeconinck",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "More specifically, if the receiver cannot process an old DCID seq number, it MUST ignore it (i.e., no error).\r\n\r\nFix #193. Also fix #137.",
+      "createdAt": "2023-03-10T09:12:13Z",
+      "updatedAt": "2023-03-10T14:34:05Z",
+      "baseRepository": "quicwg/multipath",
+      "baseRefName": "main",
+      "baseRefOid": "b320d91fb15cb7f9551d2fa606f9af23ab5089f1",
+      "headRepository": "quicwg/multipath",
+      "headRefName": "multipath-specific-old-dcid",
+      "headRefOid": "ec6be085e19f1836e2823a432fdd7f78585cdadb",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGNtpaM5PkcWp",
+          "commit": {
+            "abbreviatedOid": "4666bdc"
+          },
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-10T14:22:23Z",
+          "updatedAt": "2023-03-10T14:22:23Z",
+          "comments": [
+            {
+              "originalPosition": 4,
+              "body": "```suggestion\r\nAll multipath-specific frames relate to a Destination Connection\r\n```",
+              "createdAt": "2023-03-10T14:22:23Z",
+              "updatedAt": "2023-03-10T14:22:23Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5PkdkV",
+          "commit": {
+            "abbreviatedOid": "4666bdc"
+          },
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-10T14:25:21Z",
+          "updatedAt": "2023-03-10T14:25:21Z",
+          "comments": [
+            {
+              "originalPosition": 8,
+              "body": "I think we should cover two cases here. If the seq number is smaller than the largest issued, you should ignore. If it's larger you have a connection error...?",
+              "createdAt": "2023-03-10T14:25:21Z",
+              "updatedAt": "2023-03-10T14:25:22Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGNtpaM5PkhNe",
+          "commit": {
+            "abbreviatedOid": "4666bdc"
+          },
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-10T14:33:37Z",
+          "updatedAt": "2023-03-10T14:33:37Z",
+          "comments": [
+            {
+              "originalPosition": 8,
+              "body": "Yeah, this is related to #197 as well. Either we move the \"ACK_MP-specific\" text we currently have to this section in this PR, or instead delegate to a separate PR. Either option works for me.",
+              "createdAt": "2023-03-10T14:33:37Z",
+              "updatedAt": "2023-03-10T14:33:38Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 198,
+      "id": "PR_kwDOGNtpaM5Lxjfi",
+      "title": "Send Abandon frame after NAT rebinding",
+      "url": "https://github.com/quicwg/multipath/pull/198",
+      "state": "OPEN",
+      "author": "mirjak",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This is the proposed text more the other PR to start working this. The proposed solution in further discussion was to also extend the path abandon path with a specific reason code of this case.",
+      "createdAt": "2023-03-10T14:57:27Z",
+      "updatedAt": "2023-03-10T17:21:44Z",
+      "baseRepository": "quicwg/multipath",
+      "baseRefName": "main",
+      "baseRefOid": "1cf75916dd74fe81c5f2db5f8f617d3479f2a556",
+      "headRepository": "quicwg/multipath",
+      "headRefName": "mirjak-patch-20",
+      "headRefOid": "6d94bc39d7433067bfeef451aa3f9cf0ff629f01",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "body": "See issue #188 ",
+          "createdAt": "2023-03-10T15:22:23Z",
+          "updatedAt": "2023-03-10T15:22:23Z"
+        },
+        {
+          "author": "mirjak",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Yes, this is not ready to merge and discuss should take place in the issue (#188). I just wanted to capture this text as a starting point before we lose it.",
+          "createdAt": "2023-03-10T17:21:43Z",
+          "updatedAt": "2023-03-10T17:21:43Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGNtpaM5Plj1u",
+          "commit": {
+            "abbreviatedOid": "6d94bc3"
+          },
+          "author": "huitema",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "CHANGES_REQUESTED",
+          "body": "That PR is premature. We do not yet have consensus on how to solve issue #188, and we should keep the discussion there.",
+          "createdAt": "2023-03-10T17:02:39Z",
+          "updatedAt": "2023-03-10T17:03:36Z",
+          "comments": [
+            {
+              "originalPosition": 8,
+              "body": "I am really not sure there. First, I think having side effects for PATH_CHALLENGE is a bad idea, as PATH_CHALLENGE is just a connectivity test. Second, I do not understand the mechanism. We understand that if a node only use heuristics, it will sometime fail to identify the old path. If it does identify it, it will send two path challenges per normal NAT rebinding guidance, only the one on the new path will succeeds, and everything will be fixed. But if it does not, it will only send a path challenge on the new path, to confirm continuity. Due to asymmetric knowledge, the peer sees only one path, so the challenge arrives on the existing path. There should be no other action than sending a path response. ",
+              "createdAt": "2023-03-10T17:02:39Z",
+              "updatedAt": "2023-03-10T17:03:36Z"
             }
           ]
         }
