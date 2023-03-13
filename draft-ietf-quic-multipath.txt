@@ -99,9 +99,9 @@ Table of Contents
      7.7.  Keep Alive
      7.8.  Connection ID Changes and NAT Rebindings
    8.  New Frames
-     8.1.  PATH_ABANDON Frame
-     8.2.  PATH_STATUS frame
-     8.3.  ACK_MP Frame
+     8.1.  ACK_MP Frame
+     8.2.  PATH_ABANDON Frame
+     8.3.  PATH_STATUS frame
    9.  Error Codes
    10. IANA Considerations
    11. Security Considerations
@@ -333,10 +333,10 @@ Table of Contents
    This proposal adds two multipath control frames for path management:
 
    *  PATH_ABANDON frame for the receiver side to abandon the path (see
-      Section 8.1)
+      Section 8.2)
 
    *  PATH_STATUS frame to express a preference in path usage (see
-      Section 8.2
+      Section 8.3
 
    All the new frames are sent in 1-RTT packets [QUIC-TRANSPORT].
 
@@ -417,7 +417,7 @@ Table of Contents
 4.3.1.  Use PATH_ABANDON Frame to Close a Path
 
    Both endpoints, namely the client and the server, can initiate path
-   closure, by sending a PATH_ABANDON frame (see Section 8.1) which
+   closure, by sending a PATH_ABANDON frame (see Section 8.2) which
    requests the peer to stop sending packets with the corresponding
    Destination Connection ID.
 
@@ -641,7 +641,7 @@ Table of Contents
 
 5.1.  Sending Acknowledgements
 
-   The ACK_MP frame, as specified in Section 8.3, is used to acknowledge
+   The ACK_MP frame, as specified in Section 8.1, is used to acknowledge
    1-RTT packets.  Compared to the QUIC version 1 ACK frame, the ACK_MP
    frame additionally contains the receiver's Destination Connection ID
    Sequence Number field to distinguish the Connection ID-specific
@@ -661,7 +661,7 @@ Table of Contents
    the initial Connection ID with sequence number 0 after the handshake
    concluded.
 
-   ACK_MP frame (defined in Section 8.3) SHOULD be sent on the path it
+   ACK_MP frame (defined in Section 8.1) SHOULD be sent on the path it
    received packet with the Connection ID of the packet number space it
    acknowledges.  However, an ACK_MP frame can be returned via a
    different path, based on different strategies of sending ACK_MP
@@ -1076,13 +1076,43 @@ Table of Contents
    because the Connection ID might have been retired), it MUST silently
    ignore the frame.
 
-8.1.  PATH_ABANDON Frame
+8.1.  ACK_MP Frame
 
-   The PATH_ABANDON frame informs the peer to abandon a path.  More
-   complex path management can be made possible with additional
-   extensions (e.g., PATH_STATUS frame in [I-D.liu-multipath-quic] ).
+   The ACK_MP frame (types TBD-00 and TBD-01; experiments use
+   0xbaba00..0xbaba01) is an extension of the ACK frame defined by
+   [QUIC-TRANSPORT].  It is used to acknowledge packets that were sent
+   on different paths using multiple packet number spaces.  If the frame
+   type is TBD-01, ACK_MP frames also contain the sum of QUIC packets
+   with associated ECN marks received on the connection up to this
+   point.
 
-   PATH_ABANDON frames are formatted as shown in Figure 5.
+   ACK_MP frame is formatted as shown in Figure 5.
+
+     ACK_MP Frame {
+       Type (i) = TBD-00..TBD-01 (experiments use 0xbaba00..0xbaba01),
+       Destination Connection ID Sequence Number (i),
+       Largest Acknowledged (i),
+       ACK Delay (i),
+       ACK Range Count (i),
+       First ACK Range (i),
+       ACK Range (..) ...,
+       [ECN Counts (..)],
+     }
+
+                       Figure 5: ACK_MP Frame Format
+
+   Compared to the ACK frame specified in [QUIC-TRANSPORT], the
+   following field is added.
+
+   Destination Connection ID Sequence Number:  The sequence number of
+      the Connection ID identifying the packet number space of the 1-RTT
+      packets which are acknowledged by the ACK_MP frame.
+
+8.2.  PATH_ABANDON Frame
+
+   The PATH_ABANDON frame informs the peer to abandon a path.
+
+   PATH_ABANDON frames are formatted as shown in Figure 6.
 
      PATH_ABANDON Frame {
        Type (i) = TBD-02 (experiments use 0xbaba05),
@@ -1092,7 +1122,7 @@ Table of Contents
        Reason Phrase (..),
      }
 
-                    Figure 5: PATH_ABANDON Frame Format
+                    Figure 6: PATH_ABANDON Frame Format
 
    PATH_ABANDON frames contain the following fields:
 
@@ -1118,15 +1148,12 @@ Table of Contents
    PATH_ABANDON frames SHOULD be acknowledged.  If a packet containing a
    PATH_ABANDON frame is considered lost, the peer SHOULD repeat it.
 
-   PATH_ABANDON frames MAY be sent on any path, not only the path on
-   which the referenced Destination Connection ID is used.
-
-8.2.  PATH_STATUS frame
+8.3.  PATH_STATUS frame
 
    PATH_STATUS Frame are used by endpoints to inform the peer of the
    current status of one path, and the peer should send packets
    according to the preference expressed in these frames.  PATH_STATUS
-   frames are formatted as shown in Figure 6.
+   frames are formatted as shown in Figure 7.
 
      PATH_STATUS Frame {
        Type (i) = TBD-03 (experiments use 0xbaba06),
@@ -1135,7 +1162,7 @@ Table of Contents
        Path Status (i),
      }
 
-                     Figure 6: PATH_STATUS Frame Format
+                     Figure 7: PATH_STATUS Frame Format
 
    PATH_STATUS Frames contain the following fields:
 
@@ -1175,38 +1202,6 @@ Table of Contents
    if it was the last status sent for that path -- as indicated by the
    sequence number.
 
-8.3.  ACK_MP Frame
-
-   The ACK_MP frame (types TBD-00 and TBD-01; experiments use
-   0xbaba00..0xbaba01) is an extension of the ACK frame defined by
-   [QUIC-TRANSPORT].  It is used to acknowledge packets that were sent
-   on different paths using multiple packet number spaces.  If the frame
-   type is TBD-01, ACK_MP frames also contain the sum of QUIC packets
-   with associated ECN marks received on the connection up to this
-   point.
-
-   ACK_MP frame is formatted as shown in Figure 7.
-
-     ACK_MP Frame {
-       Type (i) = TBD-00..TBD-01 (experiments use 0xbaba00..0xbaba01),
-       Destination Connection ID Sequence Number (i),
-       Largest Acknowledged (i),
-       ACK Delay (i),
-       ACK Range Count (i),
-       First ACK Range (i),
-       ACK Range (..) ...,
-       [ECN Counts (..)],
-     }
-
-                       Figure 7: ACK_MP Frame Format
-
-   Compared to the ACK frame specified in [QUIC-TRANSPORT], the
-   following field is added.
-
-   Destination Connection ID Sequence Number:  The sequence number of
-      the Connection ID identifying the packet number space of the 1-RTT
-      packets which are acknowledged by the ACK_MP frame.
-
 9.  Error Codes
 
    Multipath QUIC transport error codes are 62-bit unsigned integers
@@ -1245,13 +1240,13 @@ Table of Contents
       +==============================+==============+===============+
       | Value                        | Frame Name   | Specification |
       +==============================+==============+===============+
-      | TBD-00 - TBD-01 (experiments | ACK_MP       | Section 8.3   |
+      | TBD-00 - TBD-01 (experiments | ACK_MP       | Section 8.1   |
       | use 0xbaba00-0xbaba01)       |              |               |
       +------------------------------+--------------+---------------+
-      | TBD-02 (experiments use      | PATH_ABANDON | Section 8.1   |
+      | TBD-02 (experiments use      | PATH_ABANDON | Section 8.2   |
       | 0xbaba05)                    |              |               |
       +------------------------------+--------------+---------------+
-      | TBD-03 (experiments use      | PATH_STATUS  | Section 8.2   |
+      | TBD-03 (experiments use      | PATH_STATUS  | Section 8.3   |
       | 0xbaba06)                    |              |               |
       +------------------------------+--------------+---------------+
 
@@ -1330,13 +1325,6 @@ Table of Contents
               schedulers-02, 25 October 2021,
               <https://datatracker.ietf.org/doc/html/draft-bonaventure-
               iccrg-schedulers-02>.
-
-   [I-D.liu-multipath-quic]
-              Liu, Y., Ma, Y., Huitema, C., An, Q., and Z. Li,
-              "Multipath Extension for QUIC", Work in Progress,
-              Internet-Draft, draft-liu-multipath-quic-04, 5 September
-              2021, <https://datatracker.ietf.org/doc/html/draft-liu-
-              multipath-quic-04>.
 
    [OLIA]     Khalili, R., Gast, N., Popovic, M., Upadhyay, U., and J.
               Le Boudec, "MPTCP is not pareto-optimal: performance
