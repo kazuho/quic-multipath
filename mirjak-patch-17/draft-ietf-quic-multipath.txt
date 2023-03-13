@@ -5,7 +5,7 @@
 QUIC Working Group                                           Y. Liu, Ed.
 Internet-Draft                                                     Y. Ma
 Intended status: Standards Track                            Alibaba Inc.
-Expires: 11 September 2023                            Q. De Coninck, Ed.
+Expires: 14 September 2023                            Q. De Coninck, Ed.
                                                                UCLouvain
                                                           O. Bonaventure
                                                   UCLouvain and Tessares
@@ -13,7 +13,7 @@ Expires: 11 September 2023                            Q. De Coninck, Ed.
                                                     Private Octopus Inc.
                                                       M. Kuehlewind, Ed.
                                                                 Ericsson
-                                                           10 March 2023
+                                                           13 March 2023
 
 
                       Multipath Extension for QUIC
@@ -51,7 +51,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 11 September 2023.
+   This Internet-Draft will expire on 14 September 2023.
 
 Copyright Notice
 
@@ -420,10 +420,10 @@ Table of Contents
    requests the peer to stop sending packets with the corresponding
    Destination Connection ID.
 
-   The receiver of a PATH_ABANDON frame should not release its resources
-   immediately, but SHOULD wait for at least three times the current
-   Probe Timeout (PTO) interval as defined in Section 6.2. of
-   [QUIC-RECOVERY] after the last sent packet before sending the
+   The sender and receiver of a PATH_ABANDON frame should not release
+   its resources immediately, but SHOULD wait for at least three times
+   the current Probe Timeout (PTO) interval as defined in Section 6.2.
+   of [QUIC-RECOVERY] after the last sent packet before sending the
    RETIRE_CONNECTION_ID frame for the corresponding CID.  This is inline
    with the requirement of Section 10.2 of [QUIC-TRANSPORT] to ensure
    that paths close cleanly and that delayed or reordered packets are
