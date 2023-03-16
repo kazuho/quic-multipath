@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2023-03-14T00:42:30.274061+00:00",
+  "timestamp": "2023-03-16T00:51:40.673826+00:00",
   "repo": "quicwg/multipath",
   "labels": [
     {
@@ -1320,7 +1320,7 @@
       ],
       "body": "As we have 0-RTT transmission in QUIC-TRANSPORT, and path validation brings at lease one round-trip-time delay for data to be sent on the new path, can we add some mechanism to provide anti-amplification limitation and support this scenario?",
       "createdAt": "2021-10-25T12:31:26Z",
-      "updatedAt": "2022-11-06T15:36:05Z",
+      "updatedAt": "2023-03-15T06:32:54Z",
       "closedAt": null,
       "comments": [
         {
@@ -1343,6 +1343,13 @@
           "body": "In most cases where it would matter, it seems like we can get path validation out of the way ahead of time, before we need a new path. \r\n\r\nIf you're trying to bring it up as part of 0-RTT/immediately, the amplification limit means that you potentially cannot send a full initial window of data, but you can still get started on slow start/getting that path up and running at the same time as you do path validation.\r\n\r\nAlso, shouldn't the packet sizing requirements help push the congestion window larger even if you're not yet using the path for non-probing packets and are just using padding? This is the same mechanism as how you can pre-warm a path for migration without needing to drop back to zero when you switch to the new path.",
           "createdAt": "2022-11-06T15:36:05Z",
           "updatedAt": "2022-11-06T15:36:05Z"
+        },
+        {
+          "author": "huitema",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "We may want to develop a security section a bit more. The only reason to send data frames immediately is the potential for reflection attacks if a peer can be induced to send data on an invalid path. There are degrees of fear. For example, if the destination address is already validated on another path and this is just the client trying sending from a different interface, then the fear-factor is very low. The only risk is that for some reason the new path will not work, causing retransmissions. The sender implementation may want to take the risk.\r\n\r\nOn the other hand, if this is a new destination address, the risk of DOSsing some innocent target is substantial, so maybe only send a minimum amount of traffic!",
+          "createdAt": "2023-03-15T06:32:54Z",
+          "updatedAt": "2023-03-15T06:32:54Z"
         }
       ]
     },
@@ -2650,7 +2657,7 @@
       ],
       "body": "Do we need some pseudocode like [RFC 9002 Appendix-A](https://datatracker.ietf.org/doc/html/rfc9002#appendix-A) and [Appendix-B](https://datatracker.ietf.org/doc/html/rfc9002#appendix-B) to describe the loss recovery and congestion control processes which are different in multiple paths?  Besides, some of the functions are different in multiple and single packet number space. \r\nThis might be helpful when people try to understand and implement the mechanisms.\r\n\r\n",
       "createdAt": "2022-03-10T12:27:12Z",
-      "updatedAt": "2022-07-06T15:34:46Z",
+      "updatedAt": "2023-03-15T08:51:17Z",
       "closedAt": null,
       "comments": [
         {
@@ -2673,6 +2680,20 @@
           "body": "Discussing some kind of coupled congestion control (or shared bottleneck detection) is out of scope of this doc in my opinion.",
           "createdAt": "2022-07-06T15:34:46Z",
           "updatedAt": "2022-07-06T15:34:46Z"
+        },
+        {
+          "author": "huitema",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "At this point in the document progress, the question with most issues should be, \"can we leave it out\". For this one, I think we certainly can. RFC are protocol specs, not implementation tutorials. If the spec is clear, leave it at that.",
+          "createdAt": "2023-03-15T06:24:59Z",
+          "updatedAt": "2023-03-15T06:24:59Z"
+        },
+        {
+          "author": "qdeconinck",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I think the current content of Section 7.2 (Implementation Considerations: Congestion Control) is sufficient. If at some point we would want to provide pseudocode for such algorithms, they would better be located in companion drafts (that would describe such algorithms), but not this base one.",
+          "createdAt": "2023-03-15T08:51:16Z",
+          "updatedAt": "2023-03-15T08:51:16Z"
         }
       ]
     },
